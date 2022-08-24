@@ -53,6 +53,7 @@
             this.labLog = new System.Windows.Forms.Label();
             this.txtTime = new System.Windows.Forms.NumericUpDown();
             this.chkIsLoop = new System.Windows.Forms.CheckBox();
+            this.btnClearLog = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.txtTime)).BeginInit();
             this.SuspendLayout();
             // 
@@ -101,7 +102,7 @@
             // 
             // btnConnect
             // 
-            this.btnConnect.Location = new System.Drawing.Point(402, 227);
+            this.btnConnect.Location = new System.Drawing.Point(957, 8);
             this.btnConnect.Name = "btnConnect";
             this.btnConnect.Size = new System.Drawing.Size(94, 29);
             this.btnConnect.TabIndex = 11;
@@ -144,7 +145,7 @@
             // 
             this.btnStop.Enabled = false;
             this.btnStop.ForeColor = System.Drawing.Color.White;
-            this.btnStop.Location = new System.Drawing.Point(535, 227);
+            this.btnStop.Location = new System.Drawing.Point(1090, 8);
             this.btnStop.Name = "btnStop";
             this.btnStop.Size = new System.Drawing.Size(94, 29);
             this.btnStop.TabIndex = 17;
@@ -182,11 +183,11 @@
             // labTime
             // 
             this.labTime.AutoSize = true;
-            this.labTime.Location = new System.Drawing.Point(308, 387);
+            this.labTime.Location = new System.Drawing.Point(308, 384);
             this.labTime.Name = "labTime";
-            this.labTime.Size = new System.Drawing.Size(39, 20);
+            this.labTime.Size = new System.Drawing.Size(79, 20);
             this.labTime.TabIndex = 22;
-            this.labTime.Text = "间隔";
+            this.labTime.Text = "间隔(毫秒)";
             // 
             // btnSubscription
             // 
@@ -239,11 +240,11 @@
             // labLog
             // 
             this.labLog.AutoSize = true;
-            this.labLog.Location = new System.Drawing.Point(26, 581);
+            this.labLog.Location = new System.Drawing.Point(29, 581);
             this.labLog.Name = "labLog";
             this.labLog.Size = new System.Drawing.Size(69, 20);
             this.labLog.TabIndex = 31;
-            this.labLog.Text = "订阅数据";
+            this.labLog.Text = "消息日志";
             // 
             // txtTime
             // 
@@ -252,7 +253,7 @@
             0,
             0,
             0});
-            this.txtTime.Location = new System.Drawing.Point(375, 382);
+            this.txtTime.Location = new System.Drawing.Point(402, 380);
             this.txtTime.Maximum = new decimal(new int[] {
             10000,
             0,
@@ -264,7 +265,7 @@
             0,
             0});
             this.txtTime.Name = "txtTime";
-            this.txtTime.Size = new System.Drawing.Size(150, 27);
+            this.txtTime.Size = new System.Drawing.Size(110, 27);
             this.txtTime.TabIndex = 32;
             this.txtTime.Value = new decimal(new int[] {
             500,
@@ -281,12 +282,24 @@
             this.chkIsLoop.TabIndex = 33;
             this.chkIsLoop.Text = "循环读取";
             this.chkIsLoop.UseVisualStyleBackColor = true;
+            this.chkIsLoop.CheckedChanged += new System.EventHandler(this.chkIsLoop_CheckedChanged);
+            // 
+            // btnClearLog
+            // 
+            this.btnClearLog.Location = new System.Drawing.Point(119, 577);
+            this.btnClearLog.Name = "btnClearLog";
+            this.btnClearLog.Size = new System.Drawing.Size(94, 29);
+            this.btnClearLog.TabIndex = 34;
+            this.btnClearLog.Text = "清空日志";
+            this.btnClearLog.UseVisualStyleBackColor = true;
+            this.btnClearLog.Click += new System.EventHandler(this.btnClearLog_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1230, 799);
+            this.Controls.Add(this.btnClearLog);
             this.Controls.Add(this.chkIsLoop);
             this.Controls.Add(this.txtTime);
             this.Controls.Add(this.labLog);
@@ -340,5 +353,6 @@
         private NumericUpDown txtTime;
         private ColumnHeader infoTime;
         private CheckBox chkIsLoop;
+        private Button btnClearLog;
     }
 }

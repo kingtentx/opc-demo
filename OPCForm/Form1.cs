@@ -40,17 +40,19 @@ namespace OPCForm
                     MessageBoxIcon.Information);
         }
 
+        private bool IsLoop = false;
+
         #region 连接
         private void btnConnect_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(txtAddress.Text))
             {
-                ShowMessage("login", "请输入opc服务器地址");
+                ShowMessage("登录", "请输入opc服务器地址");
                 return;
             }
             if (string.IsNullOrWhiteSpace(txtUserName.Text) || string.IsNullOrWhiteSpace(txtPassword.Text))
             {
-                ShowMessage("login", "请输入用户名或密码！");
+                ShowMessage("登录", "请输入用户名或密码！");
                 return;
             }
 
@@ -72,7 +74,7 @@ namespace OPCForm
             }
             else
             {
-                this.ShowMessage("Connect", "Invalid server address.");
+                this.ShowMessage("连接", "Invalid server address.");
             }
         }
 
@@ -89,7 +91,7 @@ namespace OPCForm
             }
             catch (OpcException ex)
             {
-                this.ShowMessage("Connect", "Failed to connect: " + ex.Message);
+                this.ShowMessage("连接", "Failed to connect: " + ex.Message);
             }
 
             return result;
@@ -106,7 +108,7 @@ namespace OPCForm
             }
             catch (OpcException ex)
             {
-                this.ShowMessage("Browse", "Failed to browse: " + ex.Message);
+                this.ShowMessage("查看", "Failed to browse: " + ex.Message);
             }
 
             return result;
@@ -152,7 +154,7 @@ namespace OPCForm
             }
             catch (OpcException ex)
             {
-                this.ShowMessage("Browse", "Failed to browse: " + ex.Message);
+                this.ShowMessage("查看", "Failed to browse: " + ex.Message);
             }
 
             return result;
@@ -175,6 +177,7 @@ namespace OPCForm
 
         private void btnStop_Click(object sender, EventArgs e)
         {
+            txtNode.Text = "";
             btnConnect.Enabled = true;
             btnConnect.ForeColor = System.Drawing.Color.Black;
             btnStop.Enabled = false;
@@ -197,14 +200,34 @@ namespace OPCForm
         }
 
 
-        private void btnRead_Click(object sender, EventArgs e)
+        private async void btnRead_Click(object sender, EventArgs e)
         {
-            var nodeObj = client.ReadNode(txtNode.Text);
-            if (nodeObj.Value != null)
-            {
-                Addlog(0, txtNode.Text, JsonConvert.SerializeObject(nodeObj.Value));
-            }
+            //var nodeObj = client.ReadNode(txtNode.Text);
+            //if (nodeObj.Value != null)
+            //{
+            //    Addlog(0, txtNode.Text, JsonConvert.SerializeObject(nodeObj.Value));
+            //}
 
+            if (!chkIsLoop.Checked)
+            {
+                var nodeObj = client.ReadNode(txtNode.Text);
+                if (nodeObj.Value != null)
+                {
+                    Addlog(0, txtNode.Text, JsonConvert.SerializeObject(nodeObj.Value));
+                }
+            }
+            else
+            {
+                while (IsLoop)
+                {
+                    var nodeObj = client.ReadNode(txtNode.Text);
+                    await Task.Delay(Convert.ToInt32(txtTime.Text));
+                    if (nodeObj.Value != null)
+                    {
+                        Addlog(0, txtNode.Text, JsonConvert.SerializeObject(nodeObj.Value));
+                    }
+                }
+            }
         }
         #endregion
 
@@ -250,7 +273,7 @@ namespace OPCForm
         }
         private void HandleDataChanged(object sender, OpcDataChangeReceivedEventArgs e)
         {
-            OpcMonitoredItem item = (OpcMonitoredItem)sender;         
+            OpcMonitoredItem item = (OpcMonitoredItem)sender;
             //Console.WriteLine("DataChange: {0} = {1}", item.NodeId, e.Item.Value);        
 
             var nodeObj = e.Item.Value;
@@ -309,9 +332,9 @@ namespace OPCForm
         }
         private void InitListView(ListView listView, ImageList imageList)
         {
-            ColumnHeader logTime = new ColumnHeader() { Name = "logTime", Text = "时间", Width = 200 };
-            ColumnHeader logNode = new ColumnHeader() { Name = "logNode", Text = "节点", Width = 220 };
-            ColumnHeader logMsg = new ColumnHeader() { Name = "logMsg", Text = "消息", Width = 400 };
+            ColumnHeader logTime = new ColumnHeader() { Name = "logTime", Text = "时间", Width = 240 };
+            ColumnHeader logNode = new ColumnHeader() { Name = "logNode", Text = "节点", Width = 300 };
+            ColumnHeader logMsg = new ColumnHeader() { Name = "logMsg", Text = "消息", Width = 500 };
             listView.Columns.AddRange(new ColumnHeader[] { logTime, logNode, logMsg });
             listView.View = View.Details;
             listView.SmallImageList = imageList;
@@ -333,7 +356,7 @@ namespace OPCForm
                         listView.Items.RemoveAt(maxDisplayItems);
                     }
 
-                    ListViewItem listItem = new ListViewItem(" " + DateTime.Now.ToString(), imageIndex);
+                    ListViewItem listItem = new ListViewItem(" " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"), imageIndex);
                     listItem.SubItems.Add(node);
                     listItem.SubItems.Add(info);
                     listView.Items.Insert(0, listItem);
@@ -346,7 +369,7 @@ namespace OPCForm
                     listView.Items.RemoveAt(maxDisplayItems);
                 }
 
-                ListViewItem listItem = new ListViewItem(" " + DateTime.Now.ToString(), imageIndex);
+                ListViewItem listItem = new ListViewItem(" " + DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fff"), imageIndex);
                 listItem.SubItems.Add(node);
                 listItem.SubItems.Add(info);
                 listView.Items.Insert(0, listItem);
@@ -354,7 +377,6 @@ namespace OPCForm
         }
 
         #endregion
-
 
         #region ListBox
 
@@ -374,5 +396,22 @@ namespace OPCForm
         }
 
         #endregion
+
+        private void chkIsLoop_CheckedChanged(object sender, EventArgs e)
+        {
+            if (chkIsLoop.Checked)
+            {
+                IsLoop = true;
+            }
+            else
+            {
+                IsLoop = false;
+            }
+        }
+
+        private void btnClearLog_Click(object sender, EventArgs e)
+        {
+            logListView.Items.Clear();
+        }
     }
 }
