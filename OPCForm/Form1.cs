@@ -10,15 +10,24 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Newtonsoft.Json;
+using System.Collections.Concurrent;
 
 namespace OPCForm
 {
     public partial class Form1 : Form
     {
         private OpcClient client;
-        private OpcSubscription subscription;
-        //private OpcNodeInfo nodeInfo;
-        private NodeModel nodeModel = new NodeModel();
+        private static CancellationTokenSource consumerControl;
+        private static BlockingCollection<SubscriptionItem> dataChanges;
+        //private static OpcSubscription dataChangeSubscription;
+        //private OpcSubscription subscription;
+        private List<SubscriptionInfo> subscriptionList = new List<SubscriptionInfo>();
+        //private Thread consumerThread;
+        private static OpcNodeInfo opcNodeInfo;
+        //private NodeModel nodeModel = new NodeModel();
+        private bool IsLoop = false;
+
+
         public Form1()
         {
             this.client = new OpcClient();
@@ -40,7 +49,7 @@ namespace OPCForm
                     MessageBoxIcon.Information);
         }
 
-        private bool IsLoop = false;
+
 
         #region 连接
         private void btnConnect_Click(object sender, EventArgs e)
@@ -194,9 +203,8 @@ namespace OPCForm
             nodesTreeView.SelectedNode = e.Node; //一定要先指定e.node，否则不能正确运行，下面加入自己的代码
             var nodeInfo = e.Node.Tag as OpcNodeInfo;
             txtNode.Text = nodeInfo?.NodeId.ToString();
-            nodeModel.NodeId = nodeInfo?.NodeId.ToString();
-            //nodeModel.NodeValue = JsonConvert.SerializeObject(nodeInfo?.NodeId.Value);
-            //nodeModel.DataType = nodeInfo?.NodeId.Type.ToString();
+            //nodeModel.NodeId = nodeInfo?.NodeId.ToString();
+            opcNodeInfo = nodeInfo;
         }
 
 
@@ -207,6 +215,11 @@ namespace OPCForm
             //{
             //    Addlog(0, txtNode.Text, JsonConvert.SerializeObject(nodeObj.Value));
             //}
+
+            if (client.State == OpcClientState.Created)
+            {
+                return;
+            }
 
             if (!chkIsLoop.Checked)
             {
@@ -233,6 +246,7 @@ namespace OPCForm
 
 
         #region 订阅
+
         private void btnSubscription_Click(object sender, EventArgs e)
         {
             try
@@ -244,7 +258,18 @@ namespace OPCForm
                 }
                 else
                 {
+                    //consumerControl = new CancellationTokenSource();
+                    //dataChanges = new BlockingCollection<SubscriptionItem>();
+                    //consumerThread = new Thread(ConsumeDataChanges);
+                    //consumerThread.Start(client);
+
+                    //Addlog(0, txtNode.Text, "success");
+
+                    //ConsumeDataChanges();
+
+                    //-----------
                     this.SubscriptionNode(txtNode.Text, Convert.ToInt32(txtTime.Text));
+
                     //listBox记录订阅
                     listSubscribe.Items.Add(txtNode.Text);
                 }
@@ -256,18 +281,74 @@ namespace OPCForm
 
         }
 
-        //订阅消息
+        #region test
+        //private void ConsumeDataChanges()
+        //{
+
+        //    var subscription = client.SubscribeNodes(CreateCommands(client, opcNodeInfo.NodeId));
+        //    // Enforce the fastest supported publishing interval.
+        //    subscription.PublishingInterval = Convert.ToInt32(txtTime.Value);
+        //    // Commit recent changes to the subscription.
+        //    subscription.ApplyChanges();
+
+        //    //while (!consumerControl.IsCancellationRequested)
+        //    while (subscription.IsCreated)
+        //    {
+        //        try
+        //        {
+        //            var data = dataChanges.Take(consumerControl.Token);
+
+        //            Addlog(0, data.NodeId, data.NodeValue.ToString());
+
+        //        }
+        //        catch (OperationCanceledException)
+        //        {
+        //            break;
+        //        }
+        //    }
+
+        //    var info = new SubscriptionInfo() { NodeId = opcNodeInfo.NodeId.ValueAsString, Subscription = subscription };
+        //    subscriptionList.Add(info);
+        //}
+
+        //private static IEnumerable<OpcSubscribeDataChange> CreateCommands(OpcClient client, OpcNodeId rootNodeId)
+        //{
+        //    var node = client.BrowseNode(rootNodeId);
+        //    if (node.Children().Count() > 0)
+        //    {
+        //        foreach (var childNode in node.Children())
+        //            yield return new OpcSubscribeDataChange(childNode.NodeId, HandleDataChange);
+        //    }
+        //    else
+        //    {
+        //        yield return new OpcSubscribeDataChange(node.NodeId, HandleDataChange);
+        //    }
+        //}
+
+        //private static void HandleDataChange(object sender, OpcDataChangeReceivedEventArgs e)
+        //{
+        //    var item = (OpcMonitoredItem)sender;
+        //    SubscriptionItem sub = new SubscriptionItem() { NodeId = item.NodeId.ValueAsString, NodeValue = e.Item.Value };
+        //    dataChanges.Add(sub);
+        //}
+
+        #endregion
+
+        #region 订阅消息  
+
         private void SubscriptionNode(string nodeName, int times)
         {
             if (client.State == OpcClientState.Connected)
             {
                 var nodeObj = client.ReadNode(nodeName);
-
                 if (nodeObj.Value != null)
                 {
-                    subscription = client.SubscribeDataChange(nodeName, HandleDataChanged);
+                    var subscription = client.SubscribeDataChange(nodeName, HandleDataChanged);
                     subscription.PublishingInterval = times;
                     subscription.ApplyChanges();
+
+                    var info = new SubscriptionInfo() { NodeId = nodeName, Subscription = subscription };
+                    subscriptionList.Add(info);
                 }
             }
         }
@@ -290,25 +371,56 @@ namespace OPCForm
             }
         }
 
+        #endregion
+
         private void btnUnSubscription_Click(object sender, EventArgs e)
         {
             //判断是否已订阅
-            if (!listSubscribe.Items.Contains(txtNode.Text))
+            //if (!listSubscribe.Items.Contains(txtNode.Text))
+            //{
+            //    return;
+            //}
+            if (listSubscribe.Items.Count == 0)
             {
+                ShowMessage("提示", "请先订阅节点");
                 return;
             }
-
+            if (listSubscribe.SelectedIndex ==-1 )
+            {
+                ShowMessage("提示", "请选择要取消订阅的节点");
+                return;
+            }
+            var nodeId = listSubscribe.SelectedItem.ToString();
             if (client.State == OpcClientState.Connected)
             {
-                // var subscription = client.SubscribeDataChange(txtNode.Text, HandleDataChanged);
-                if (subscription != null)
+                //var item = subscriptionList.Where(p => p.NodeId.Equals(txtNode.Text)).FirstOrDefault(); //client.SubscribeDataChange(txtNode.Text, HandleDataChanged);
+                var item = subscriptionList.Where(p => p.NodeId.Equals(nodeId)).FirstOrDefault(); //client.SubscribeDataChange(txtNode.Text, HandleDataChanged);
+                if (item != null)
                 {
-                    subscription.Unsubscribe();
+                    item.Subscription.Unsubscribe();
+                    subscriptionList.Remove(item);
                     //listBox移除订阅记录
-                    listSubscribe.Items.Remove(txtNode.Text);
+                    listSubscribe.Items.Remove(nodeId);
                 }
-
             }
+            //if (!listSubscribe.Items.Contains(txtNode.Text))
+            //{
+            //    return;
+            //}
+
+            //subscription = client.SubscribeDataChange(txtNode.Text, HandleDataChange);
+
+            //var aa = subscription.MonitoredItems.ToArray();
+            //if (subscription != null)
+            //{
+            //    subscription.Unsubscribe();
+            //    consumerControl.Cancel();
+            //    consumerThread.Join();
+            //    //listBox移除订阅记录
+            //    listSubscribe.Items.Remove(txtNode.Text);
+            //}
+
+
         }
 
         #endregion
