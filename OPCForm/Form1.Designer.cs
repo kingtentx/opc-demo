@@ -234,8 +234,7 @@
             this.listSubscribe.Location = new System.Drawing.Point(938, 60);
             this.listSubscribe.Name = "listSubscribe";
             this.listSubscribe.Size = new System.Drawing.Size(280, 504);
-            this.listSubscribe.TabIndex = 29;
-            this.listSubscribe.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.listSubscribe_MouseDoubleClick);
+            this.listSubscribe.TabIndex = 29;          
             // 
             // labLog
             // 

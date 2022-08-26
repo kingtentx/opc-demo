@@ -17,16 +17,10 @@ namespace OPCForm
     public partial class Form1 : Form
     {
         private OpcClient client;
-        private static CancellationTokenSource consumerControl;
-        private static BlockingCollection<SubscriptionItem> dataChanges;
-        //private static OpcSubscription dataChangeSubscription;
-        //private OpcSubscription subscription;
-        private List<SubscriptionInfo> subscriptionList = new List<SubscriptionInfo>();
-        //private Thread consumerThread;
-        private static OpcNodeInfo opcNodeInfo;
-        //private NodeModel nodeModel = new NodeModel();
+        private static List<ConsumerSubscriptionInfo> consumerList = new List<ConsumerSubscriptionInfo>();       
+        private static List<SubscriptionInfo> subscriptionList = new List<SubscriptionInfo>(); 
+        private static string currentNodeId;
         private bool IsLoop = false;
-
 
         public Form1()
         {
@@ -48,8 +42,6 @@ namespace OPCForm
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Information);
         }
-
-
 
         #region 连接
         private void btnConnect_Click(object sender, EventArgs e)
@@ -202,20 +194,15 @@ namespace OPCForm
         {
             nodesTreeView.SelectedNode = e.Node; //一定要先指定e.node，否则不能正确运行，下面加入自己的代码
             var nodeInfo = e.Node.Tag as OpcNodeInfo;
-            txtNode.Text = nodeInfo?.NodeId.ToString();
+            currentNodeId = txtNode.Text = nodeInfo?.NodeId.ToString();
+
             //nodeModel.NodeId = nodeInfo?.NodeId.ToString();
-            opcNodeInfo = nodeInfo;
+            //opcNodeInfo = nodeInfo;
         }
 
 
         private async void btnRead_Click(object sender, EventArgs e)
         {
-            //var nodeObj = client.ReadNode(txtNode.Text);
-            //if (nodeObj.Value != null)
-            //{
-            //    Addlog(0, txtNode.Text, JsonConvert.SerializeObject(nodeObj.Value));
-            //}
-
             if (client.State == OpcClientState.Created)
             {
                 return;
@@ -234,7 +221,7 @@ namespace OPCForm
                 while (IsLoop)
                 {
                     var nodeObj = client.ReadNode(txtNode.Text);
-                    await Task.Delay(Convert.ToInt32(txtTime.Text));
+                    await Task.Delay(Convert.ToInt32(txtTime.Value));
                     if (nodeObj.Value != null)
                     {
                         Addlog(0, txtNode.Text, JsonConvert.SerializeObject(nodeObj.Value));
@@ -258,17 +245,23 @@ namespace OPCForm
                 }
                 else
                 {
-                    //consumerControl = new CancellationTokenSource();
-                    //dataChanges = new BlockingCollection<SubscriptionItem>();
-                    //consumerThread = new Thread(ConsumeDataChanges);
-                    //consumerThread.Start(client);
+                    var token = new CancellationTokenSource();
+                    var dataChanges = new BlockingCollection<SubscriptionItem>();
 
-                    //Addlog(0, txtNode.Text, "success");
+                    var consumerThread = new Thread(ConsumeDataChanges);
 
-                    //ConsumeDataChanges();
+                    consumerThread.Start(client);
 
+                    var consumer = new ConsumerSubscriptionInfo()
+                    {
+                        NodeId = txtNode.Text,
+                        TokenSource = token,
+                        SubscriptionDataChanges = dataChanges,
+                        ConsumerThread = consumerThread
+                    };
+                    consumerList.Add(consumer);
                     //-----------
-                    this.SubscriptionNode(txtNode.Text, Convert.ToInt32(txtTime.Text));
+                    //this.SubscriptionNode(txtNode.Text, Convert.ToInt32(txtTime.Text));
 
                     //listBox记录订阅
                     listSubscribe.Items.Add(txtNode.Text);
@@ -282,146 +275,149 @@ namespace OPCForm
         }
 
         #region test
-        //private void ConsumeDataChanges()
-        //{
+        private void ConsumeDataChanges(object sender)
+        {
+            var consumer = consumerList.Where(p => p.NodeId.Equals(currentNodeId)).FirstOrDefault();
 
-        //    var subscription = client.SubscribeNodes(CreateCommands(client, opcNodeInfo.NodeId));
-        //    // Enforce the fastest supported publishing interval.
-        //    subscription.PublishingInterval = Convert.ToInt32(txtTime.Value);
-        //    // Commit recent changes to the subscription.
-        //    subscription.ApplyChanges();
+            var subscription = client.SubscribeNodes(CreateCommands(client, currentNodeId));
+            // Enforce the fastest supported publishing interval.
+            subscription.PublishingInterval = Convert.ToInt32(txtTime.Value);
+            // Commit recent changes to the subscription.
+            subscription.ApplyChanges();
 
-        //    //while (!consumerControl.IsCancellationRequested)
-        //    while (subscription.IsCreated)
-        //    {
-        //        try
-        //        {
-        //            var data = dataChanges.Take(consumerControl.Token);
+            //记录订阅          
+            subscriptionList.Add(new SubscriptionInfo() { NodeId = currentNodeId, Subscription = subscription });
 
-        //            Addlog(0, data.NodeId, data.NodeValue.ToString());
+            //while (!consumerControl.IsCancellationRequested)
+            while (!consumer.TokenSource.IsCancellationRequested)
+            {
+                try
+                {
+                    var data = consumer.SubscriptionDataChanges.Take(consumer.TokenSource.Token);
 
-        //        }
-        //        catch (OperationCanceledException)
-        //        {
-        //            break;
-        //        }
-        //    }
+                    Addlog(0, data.NodeId, data.NodeValue.ToString());
 
-        //    var info = new SubscriptionInfo() { NodeId = opcNodeInfo.NodeId.ValueAsString, Subscription = subscription };
-        //    subscriptionList.Add(info);
-        //}
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
+            }
 
-        //private static IEnumerable<OpcSubscribeDataChange> CreateCommands(OpcClient client, OpcNodeId rootNodeId)
-        //{
-        //    var node = client.BrowseNode(rootNodeId);
-        //    if (node.Children().Count() > 0)
-        //    {
-        //        foreach (var childNode in node.Children())
-        //            yield return new OpcSubscribeDataChange(childNode.NodeId, HandleDataChange);
-        //    }
-        //    else
-        //    {
-        //        yield return new OpcSubscribeDataChange(node.NodeId, HandleDataChange);
-        //    }
-        //}
+        }
 
-        //private static void HandleDataChange(object sender, OpcDataChangeReceivedEventArgs e)
-        //{
-        //    var item = (OpcMonitoredItem)sender;
-        //    SubscriptionItem sub = new SubscriptionItem() { NodeId = item.NodeId.ValueAsString, NodeValue = e.Item.Value };
-        //    dataChanges.Add(sub);
-        //}
+        private static IEnumerable<OpcSubscribeDataChange> CreateCommands(OpcClient client, OpcNodeId rootNodeId)
+        {
+            var nodeInfo = client.BrowseNode(rootNodeId);
+            if (nodeInfo.Children().Count() > 0)
+            {
+                foreach (var childNode in nodeInfo.Children())
+                    yield return new OpcSubscribeDataChange(childNode.NodeId, HandleDataChange);
+            }
+            else
+            {
+                yield return new OpcSubscribeDataChange(nodeInfo.NodeId, HandleDataChange);
+            }
+        }
+
+        private static void HandleDataChange(object sender, OpcDataChangeReceivedEventArgs e)
+        {
+            var item = (OpcMonitoredItem)sender;
+            var subItem = new SubscriptionItem() { NodeId = item.NodeId.ValueAsString, NodeValue = e.Item.Value };
+
+            var subNodes = subscriptionList.Select(p => p.NodeId);
+            var consumer = consumerList.Where(p => subNodes.Contains(p.NodeId)).FirstOrDefault();
+            if (consumer != null)
+                consumer.SubscriptionDataChanges.Add(subItem);
+        }
+
 
         #endregion
 
         #region 订阅消息  
 
-        private void SubscriptionNode(string nodeName, int times)
-        {
-            if (client.State == OpcClientState.Connected)
-            {
-                var nodeObj = client.ReadNode(nodeName);
-                if (nodeObj.Value != null)
-                {
-                    var subscription = client.SubscribeDataChange(nodeName, HandleDataChanged);
-                    subscription.PublishingInterval = times;
-                    subscription.ApplyChanges();
+        //private void SubscriptionNode(string nodeName, int times)
+        //{
+        //    if (client.State == OpcClientState.Connected)
+        //    {
+        //        var nodeObj = client.ReadNode(nodeName);
+        //        if (nodeObj.Value != null)
+        //        {
+        //            var subscription = client.SubscribeDataChange(nodeName, HandleDataChanged);
+        //            subscription.PublishingInterval = times;
+        //            subscription.ApplyChanges();
 
-                    var info = new SubscriptionInfo() { NodeId = nodeName, Subscription = subscription };
-                    subscriptionList.Add(info);
-                }
-            }
-        }
-        private void HandleDataChanged(object sender, OpcDataChangeReceivedEventArgs e)
-        {
-            OpcMonitoredItem item = (OpcMonitoredItem)sender;
-            //Console.WriteLine("DataChange: {0} = {1}", item.NodeId, e.Item.Value);        
+        //            var info = new SubscriptionInfo() { NodeId = nodeName, Subscription = subscription };
+        //            subscriptionList.Add(info);
+        //        }
+        //    }
+        //}
+        //private void HandleDataChanged(object sender, OpcDataChangeReceivedEventArgs e)
+        //{
+        //    OpcMonitoredItem item = (OpcMonitoredItem)sender;
+        //    //Console.WriteLine("DataChange: {0} = {1}", item.NodeId, e.Item.Value);        
 
-            var nodeObj = e.Item.Value;
-            if (nodeObj.Value != null)
-            {
-                try
-                {
-                    PrintLog(0, item.NodeId.ToString(), JsonConvert.SerializeObject(nodeObj.Value));
-                }
-                catch (Exception ex)
-                {
-                    PrintLog(1, item.NodeId.ToString(), ex.Message);
-                }
-            }
-        }
+        //    var nodeObj = e.Item.Value;
+        //    if (nodeObj.Value != null)
+        //    {
+        //        try
+        //        {
+        //            PrintLog(0, item.NodeId.ToString(), JsonConvert.SerializeObject(nodeObj.Value));
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            PrintLog(1, item.NodeId.ToString(), ex.Message);
+        //        }
+        //    }
+        //}
 
         #endregion
 
         private void btnUnSubscription_Click(object sender, EventArgs e)
         {
-            //判断是否已订阅
-            //if (!listSubscribe.Items.Contains(txtNode.Text))
-            //{
-            //    return;
-            //}
+            //判断是否已订阅         
             if (listSubscribe.Items.Count == 0)
             {
                 ShowMessage("提示", "请先订阅节点");
                 return;
             }
-            if (listSubscribe.SelectedIndex ==-1 )
+            if (listSubscribe.SelectedIndex == -1)
             {
                 ShowMessage("提示", "请选择要取消订阅的节点");
                 return;
             }
             var nodeId = listSubscribe.SelectedItem.ToString();
-            if (client.State == OpcClientState.Connected)
+
+            #region 单节点
+            //if (client.State == OpcClientState.Connected)
+            //{
+            //    //var item = subscriptionList.Where(p => p.NodeId.Equals(txtNode.Text)).FirstOrDefault(); //client.SubscribeDataChange(txtNode.Text, HandleDataChanged);
+            //    var item = subscriptionList.Where(p => p.NodeId.Equals(nodeId)).FirstOrDefault(); //client.SubscribeDataChange(txtNode.Text, HandleDataChanged);
+            //    if (item != null)
+            //    {
+            //        item.Subscription.Unsubscribe();
+            //        subscriptionList.Remove(item);
+            //        //listBox移除订阅记录
+            //        listSubscribe.Items.Remove(nodeId);
+            //    }
+            //}
+            #endregion
+
+            var item = subscriptionList.Where(p => p.NodeId.Equals(nodeId)).FirstOrDefault(); //client.SubscribeDataChange(txtNode.Text, HandleDataChanged);              
+            if (item != null)
             {
-                //var item = subscriptionList.Where(p => p.NodeId.Equals(txtNode.Text)).FirstOrDefault(); //client.SubscribeDataChange(txtNode.Text, HandleDataChanged);
-                var item = subscriptionList.Where(p => p.NodeId.Equals(nodeId)).FirstOrDefault(); //client.SubscribeDataChange(txtNode.Text, HandleDataChanged);
-                if (item != null)
-                {
-                    item.Subscription.Unsubscribe();
-                    subscriptionList.Remove(item);
-                    //listBox移除订阅记录
-                    listSubscribe.Items.Remove(nodeId);
-                }
+                var consumer = consumerList.Where(p => p.NodeId.Equals(nodeId)).FirstOrDefault();
+                consumer.TokenSource.Cancel();
+                consumer.ConsumerThread.Join();
+                consumerList.Remove(consumer);
+
+                item.Subscription.Unsubscribe();
+                subscriptionList.Remove(item);
+                //listBox移除订阅记录
+                listSubscribe.Items.Remove(nodeId);
             }
-            //if (!listSubscribe.Items.Contains(txtNode.Text))
-            //{
-            //    return;
-            //}
-
-            //subscription = client.SubscribeDataChange(txtNode.Text, HandleDataChange);
-
-            //var aa = subscription.MonitoredItems.ToArray();
-            //if (subscription != null)
-            //{
-            //    subscription.Unsubscribe();
-            //    consumerControl.Cancel();
-            //    consumerThread.Join();
-            //    //listBox移除订阅记录
-            //    listSubscribe.Items.Remove(txtNode.Text);
-            //}
-
-
         }
+
 
         #endregion
 
@@ -468,7 +464,7 @@ namespace OPCForm
                         listView.Items.RemoveAt(maxDisplayItems);
                     }
 
-                    ListViewItem listItem = new ListViewItem(" " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"), imageIndex);
+                    ListViewItem listItem = new ListViewItem(" " + DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fff"), imageIndex);
                     listItem.SubItems.Add(node);
                     listItem.SubItems.Add(info);
                     listView.Items.Insert(0, listItem);
@@ -488,26 +484,7 @@ namespace OPCForm
             }
         }
 
-        #endregion
-
-        #region ListBox
-
-        private void listSubscribe_MouseDoubleClick(object sender, MouseEventArgs e)
-        {
-            int index = this.listSubscribe.IndexFromPoint(e.Location);
-            if (index != ListBox.NoMatches)
-            {
-                // MessageBox.Show(this.listSubscribe.SelectedItem.ToString()); //执行双击事件
-                //this.SubscriptionNode(this.listSubscribe.SelectedItem.ToString(), Convert.ToInt32(txtTime.Text));
-                listSubscribe.SelectedIndex = -1;//不做任何操作，将ListBox的选中项取消
-            }
-            else
-            {
-                listSubscribe.SelectedIndex = -1;//不做任何操作，将ListBox的选中项取消
-            }
-        }
-
-        #endregion
+        #endregion      
 
         private void chkIsLoop_CheckedChanged(object sender, EventArgs e)
         {
