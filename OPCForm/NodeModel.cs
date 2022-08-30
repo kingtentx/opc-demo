@@ -34,5 +34,18 @@ namespace OPCForm
         public BlockingCollection<SubscriptionItem> SubscriptionDataChanges = new BlockingCollection<SubscriptionItem>();
 
         public Thread ConsumerThread { get; set; }
+
+        public List<NodeTree> SubNodes = new List<NodeTree>();
+    }
+
+    public class NodeTree
+    {
+        public string Id { get; set; }
+
+        public string NodeName { get; set; }
+
+        //public string Level { get; set; }
+
+        public string ParentId { get; set; }
     }
 }
