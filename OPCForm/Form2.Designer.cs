@@ -48,6 +48,7 @@
             this.txtPort = new System.Windows.Forms.NumericUpDown();
             this.txtClear = new System.Windows.Forms.Button();
             this.txtSubscribe = new System.Windows.Forms.Button();
+            this.btnUnSubscribe = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.txtPort)).BeginInit();
             this.SuspendLayout();
             // 
@@ -83,7 +84,7 @@
             this.txtClientId.Location = new System.Drawing.Point(163, 177);
             this.txtClientId.Name = "txtClientId";
             this.txtClientId.Size = new System.Drawing.Size(368, 27);
-            this.txtClientId.TabIndex = 3;
+            this.txtClientId.TabIndex = 2;
             this.txtClientId.Text = "mytest";
             // 
             // txtUserName
@@ -91,7 +92,7 @@
             this.txtUserName.Location = new System.Drawing.Point(163, 229);
             this.txtUserName.Name = "txtUserName";
             this.txtUserName.Size = new System.Drawing.Size(368, 27);
-            this.txtUserName.TabIndex = 4;
+            this.txtUserName.TabIndex = 3;
             this.txtUserName.Text = "admin";
             // 
             // txtPassword
@@ -99,17 +100,18 @@
             this.txtPassword.Location = new System.Drawing.Point(163, 280);
             this.txtPassword.Name = "txtPassword";
             this.txtPassword.Size = new System.Drawing.Size(368, 27);
-            this.txtPassword.TabIndex = 5;
+            this.txtPassword.TabIndex = 4;
             this.txtPassword.Text = "123qwe";
             // 
             // btnSave
             // 
-            this.btnSave.Location = new System.Drawing.Point(170, 647);
+            this.btnSave.Location = new System.Drawing.Point(170, 606);
             this.btnSave.Name = "btnSave";
             this.btnSave.Size = new System.Drawing.Size(94, 29);
-            this.btnSave.TabIndex = 6;
+            this.btnSave.TabIndex = 10;
             this.btnSave.Text = "保存设置";
             this.btnSave.UseVisualStyleBackColor = true;
+            this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
             // 
             // labAddress
             // 
@@ -133,8 +135,8 @@
             // 
             this.txtAddress.Location = new System.Drawing.Point(163, 68);
             this.txtAddress.Name = "txtAddress";
-            this.txtAddress.Size = new System.Drawing.Size(251, 27);
-            this.txtAddress.TabIndex = 9;
+            this.txtAddress.Size = new System.Drawing.Size(368, 27);
+            this.txtAddress.TabIndex = 0;
             this.txtAddress.Text = "10.47.102.70";
             // 
             // btnStart
@@ -142,7 +144,7 @@
             this.btnStart.Location = new System.Drawing.Point(167, 329);
             this.btnStart.Name = "btnStart";
             this.btnStart.Size = new System.Drawing.Size(94, 29);
-            this.btnStart.TabIndex = 11;
+            this.btnStart.TabIndex = 5;
             this.btnStart.Text = "启动链接";
             this.btnStart.UseVisualStyleBackColor = true;
             this.btnStart.Click += new System.EventHandler(this.btnStart_Click);
@@ -152,7 +154,7 @@
             this.btnStop.Location = new System.Drawing.Point(287, 329);
             this.btnStop.Name = "btnStop";
             this.btnStop.Size = new System.Drawing.Size(94, 29);
-            this.btnStop.TabIndex = 12;
+            this.btnStop.TabIndex = 6;
             this.btnStop.Text = "关闭链接";
             this.btnStop.UseVisualStyleBackColor = true;
             this.btnStop.Click += new System.EventHandler(this.btnStop_Click);
@@ -162,7 +164,7 @@
             this.txtTopic.Location = new System.Drawing.Point(163, 415);
             this.txtTopic.Name = "txtTopic";
             this.txtTopic.Size = new System.Drawing.Size(368, 27);
-            this.txtTopic.TabIndex = 13;
+            this.txtTopic.TabIndex = 7;
             this.txtTopic.Text = "opc/pc/test";
             // 
             // labTopic
@@ -181,7 +183,7 @@
             this.txtMessage.Name = "txtMessage";
             this.txtMessage.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.txtMessage.Size = new System.Drawing.Size(557, 439);
-            this.txtMessage.TabIndex = 15;
+            this.txtMessage.TabIndex = 11;
             // 
             // txtSend
             // 
@@ -203,7 +205,7 @@
             // 
             // txtPort
             // 
-            this.txtPort.Location = new System.Drawing.Point(167, 123);
+            this.txtPort.Location = new System.Drawing.Point(163, 122);
             this.txtPort.Maximum = new decimal(new int[] {
             100000,
             0,
@@ -211,7 +213,7 @@
             0});
             this.txtPort.Name = "txtPort";
             this.txtPort.Size = new System.Drawing.Size(150, 27);
-            this.txtPort.TabIndex = 18;
+            this.txtPort.TabIndex = 1;
             this.txtPort.Value = new decimal(new int[] {
             1883,
             0,
@@ -223,7 +225,7 @@
             this.txtClear.Location = new System.Drawing.Point(583, 517);
             this.txtClear.Name = "txtClear";
             this.txtClear.Size = new System.Drawing.Size(94, 29);
-            this.txtClear.TabIndex = 19;
+            this.txtClear.TabIndex = 12;
             this.txtClear.Text = "清空消息";
             this.txtClear.UseVisualStyleBackColor = true;
             this.txtClear.Click += new System.EventHandler(this.txtClear_Click);
@@ -233,16 +235,27 @@
             this.txtSubscribe.Location = new System.Drawing.Point(170, 486);
             this.txtSubscribe.Name = "txtSubscribe";
             this.txtSubscribe.Size = new System.Drawing.Size(94, 29);
-            this.txtSubscribe.TabIndex = 20;
+            this.txtSubscribe.TabIndex = 8;
             this.txtSubscribe.Text = "订阅主题";
             this.txtSubscribe.UseVisualStyleBackColor = true;
             this.txtSubscribe.Click += new System.EventHandler(this.txtSubscribe_Click);
+            // 
+            // btnUnSubscribe
+            // 
+            this.btnUnSubscribe.Location = new System.Drawing.Point(298, 486);
+            this.btnUnSubscribe.Name = "btnUnSubscribe";
+            this.btnUnSubscribe.Size = new System.Drawing.Size(94, 29);
+            this.btnUnSubscribe.TabIndex = 9;
+            this.btnUnSubscribe.Text = "取消订阅";
+            this.btnUnSubscribe.UseVisualStyleBackColor = true;
+            this.btnUnSubscribe.Click += new System.EventHandler(this.btnUnSubscribe_Click);
             // 
             // Form2
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1228, 833);
+            this.Controls.Add(this.btnUnSubscribe);
             this.Controls.Add(this.txtSubscribe);
             this.Controls.Add(this.txtClear);
             this.Controls.Add(this.txtPort);
@@ -293,5 +306,6 @@
         private NumericUpDown txtPort;
         private Button txtClear;
         private Button txtSubscribe;
+        private Button btnUnSubscribe;
     }
 }

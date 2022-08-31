@@ -78,8 +78,7 @@ namespace OPCForm.Mqtt
                 mqttClient.ApplicationMessageReceivedAsync += _mqttClient_ApplicationMessageReceivedAsync; // 收到消息事件
               
                 await mqttClient.ConnectAsync(clientOptions);
-
-                ToSignal(new MqttSignal() { Type = 1, Data = $"客户端[{clientOptions.ClientId}]尝试连接..." });
+               
                 DateTime OutTime = DateTime.Now;
 
                 while (mqttClient != null && !mqttClient.IsConnected)
@@ -194,7 +193,7 @@ namespace OPCForm.Mqtt
             try
             {
                 await mqttClient.DisconnectAsync();
-                ToSignal(new MqttSignal() { Type = 1, Data = $"客户端断开连接..." });
+                //ToSignal(new MqttSignal() { Type = 1, Data = $"客户端断开连接..." });
                 return true;
             }
             catch (Exception ex)
