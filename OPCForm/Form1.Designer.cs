@@ -212,9 +212,9 @@
             // 
             // logListView
             // 
-            this.logListView.Location = new System.Drawing.Point(15, 609);
+            this.logListView.Location = new System.Drawing.Point(12, 607);
             this.logListView.Name = "logListView";
-            this.logListView.Size = new System.Drawing.Size(1194, 178);
+            this.logListView.Size = new System.Drawing.Size(1206, 222);
             this.logListView.TabIndex = 28;
             this.logListView.UseCompatibleStateImageBehavior = false;
             // 
@@ -234,12 +234,12 @@
             this.listSubscribe.Location = new System.Drawing.Point(938, 60);
             this.listSubscribe.Name = "listSubscribe";
             this.listSubscribe.Size = new System.Drawing.Size(280, 504);
-            this.listSubscribe.TabIndex = 29;          
+            this.listSubscribe.TabIndex = 29;
             // 
             // labLog
             // 
             this.labLog.AutoSize = true;
-            this.labLog.Location = new System.Drawing.Point(29, 581);
+            this.labLog.Location = new System.Drawing.Point(29, 579);
             this.labLog.Name = "labLog";
             this.labLog.Size = new System.Drawing.Size(69, 20);
             this.labLog.TabIndex = 31;
@@ -285,7 +285,7 @@
             // 
             // btnClearLog
             // 
-            this.btnClearLog.Location = new System.Drawing.Point(119, 577);
+            this.btnClearLog.Location = new System.Drawing.Point(119, 575);
             this.btnClearLog.Name = "btnClearLog";
             this.btnClearLog.Size = new System.Drawing.Size(94, 29);
             this.btnClearLog.TabIndex = 34;
@@ -297,7 +297,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1230, 799);
+            this.ClientSize = new System.Drawing.Size(1228, 833);
             this.Controls.Add(this.btnClearLog);
             this.Controls.Add(this.chkIsLoop);
             this.Controls.Add(this.txtTime);

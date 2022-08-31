@@ -196,7 +196,7 @@ namespace OPCForm
             nodesTreeView.SelectedNode = e.Node; //一定要先指定e.node，否则不能正确运行，下面加入自己的代码
             var nodeInfo = e.Node.Tag as OpcNodeInfo;
             currentNodeId = txtNode.Text = nodeInfo?.NodeId.ToString();
-            
+
         }
 
 
@@ -473,7 +473,7 @@ namespace OPCForm
         {
             ColumnHeader logTime = new ColumnHeader() { Name = "logTime", Text = "时间", Width = 240 };
             ColumnHeader logNode = new ColumnHeader() { Name = "logNode", Text = "节点", Width = 300 };
-            ColumnHeader logMsg = new ColumnHeader() { Name = "logMsg", Text = "消息", Width = 500 };
+            ColumnHeader logMsg = new ColumnHeader() { Name = "logMsg", Text = "消息", Width = 660 };
             listView.Columns.AddRange(new ColumnHeader[] { logTime, logNode, logMsg });
             listView.View = View.Details;
             listView.SmallImageList = imageList;
