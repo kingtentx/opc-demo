@@ -9,6 +9,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="6.0.8" />
     <PackageReference Include="MQTTnet" Version="4.1.0.247" />
     <PackageReference Include="Opc.UaFx.Client" Version="2.28.0" />
     <PackageReference Include="Serilog" Version="2.11.0" />

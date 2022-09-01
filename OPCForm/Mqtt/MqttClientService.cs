@@ -139,8 +139,8 @@ namespace OPCForm.Mqtt
         /// <returns></returns>
         private async Task _mqttClient_ApplicationMessageReceivedAsync(MqttApplicationMessageReceivedEventArgs arg)
         {
-            var resutl = $"客户端ID=【{arg.ClientId}】接收到消息。 Topic主题=【{arg.ApplicationMessage.Topic}】 消息=【{Encoding.UTF8.GetString(arg.ApplicationMessage.Payload)}】 qos等级=【{arg.ApplicationMessage.QualityOfServiceLevel}】";
-            ToSignal(new MqttSignal() { Type = 1, Data = resutl });
+            var resutl = $"客户端【{arg.ClientId}】接收到消息。 Topic主题【{arg.ApplicationMessage.Topic}】 消息【{Encoding.UTF8.GetString(arg.ApplicationMessage.Payload)}】 qos等级【{arg.ApplicationMessage.QualityOfServiceLevel}】";
+            ToSignal(new MqttSignal() { Type = 3, Data = resutl });
             //Log.Information(resutl);
             await Task.CompletedTask;
         }
@@ -153,7 +153,7 @@ namespace OPCForm.Mqtt
         {
             try
             {
-                ToSignal(new MqttSignal() { Type = 1, Data = string.Format("客户端[{0}]订阅主题[{1}]成功！", mqttClient.Options.ClientId, topic) });
+                ToSignal(new MqttSignal() { Type = 4, Data = string.Format("客户端【{0}】订阅主题【{1}】成功！", mqttClient.Options.ClientId, topic) });
                 await mqttClient.SubscribeAsync(topic, qosLevel);
                 return true;
             }
@@ -174,7 +174,7 @@ namespace OPCForm.Mqtt
             try
             {
                 await mqttClient.UnsubscribeAsync(topic);
-                ToSignal(new MqttSignal() { Type = 1, Data = string.Format("客户端[{0}]取消主题[{1}]成功！", mqttClient.Options.ClientId, topic) });
+                ToSignal(new MqttSignal() { Type = 5, Data = string.Format("客户端【{0}】取消主题【{1}】成功！", mqttClient.Options.ClientId, topic) });
                 return true;
             }
             catch (Exception ex)
@@ -198,7 +198,7 @@ namespace OPCForm.Mqtt
             }
             catch (Exception ex)
             {
-                ToSignal(new MqttSignal() { Type = 1, Data = $"客户端断开连接异常..." + ex.Message });
+                ToSignal(new MqttSignal() { Type = 0, Data = $"客户端断开连接异常..." + ex.Message });
             }
             return false;
         }
@@ -215,12 +215,12 @@ namespace OPCForm.Mqtt
                     Retain = isRetain  //服务端是否保留消息。true为保留，如果有新的订阅者连接，就会立马收到该消息。
                 };
                 await mqttClient.PublishAsync(message);
-                ToSignal(new MqttSignal() { Type = 1, Data = string.Format("客户端[{0}]，主题[{1}]发送消息：【{2}】", mqttClient.Options.ClientId, topic, data) });
+                ToSignal(new MqttSignal() { Type = 2, Data = string.Format("客户端【{0}】，主题【{1}】发送消息：【{2}】", mqttClient.Options.ClientId, topic, data) });
                 return true;
             }
             catch (Exception ex)
             {
-                ToSignal(new MqttSignal() { Type = 0, Data = string.Format("客户端[{0}]，主题[{1}]发送消息[{2}]异常！>{3}", mqttClient.Options.ClientId, topic, data, ex.Message) });
+                ToSignal(new MqttSignal() { Type = 0, Data = string.Format("客户端【{0}】，主题【{1}】发送消息【{2}】异常！>【3】", mqttClient.Options.ClientId, topic, data, ex.Message) });
             }
             return false;
         }

@@ -25,27 +25,28 @@ namespace OPCForm
         public Form2()
         {
             InitializeComponent();
+            InitListView(msgListView, msgImageList);
 
 #if DEBUG
             path = Common.GetApplicationPath() + "AppData/Config.xml";
 #else
-          path = AppDomain.CurrentDomain.BaseDirectory + "AppData/Config.xml";
+            path = AppDomain.CurrentDomain.BaseDirectory + "AppData/Config.xml";
 #endif
             XDocument doc = XDocument.Load(path);
 
-            XElement mqqttConfig = doc.Element("MqttConfig");
-            if (mqqttConfig != null)
+            XElement mqttConfig = doc.Element("MqttConfig");
+            if (mqttConfig != null)
             {
-                txtAddress.Text = mqqttConfig.Element("Address") != null ? mqqttConfig.Element("Address")?.Value : "";
-                txtClientId.Text = mqqttConfig.Element("ClientId") != null ? mqqttConfig.Element("ClientId")?.Value : "";
-                txtUserName.Text = mqqttConfig.Element("UserName") != null ? mqqttConfig.Element("UserName")?.Value : "";
-                txtPassword.Text = mqqttConfig.Element("Password") != null ? mqqttConfig.Element("Password")?.Value : "";
+                txtAddress.Text = mqttConfig.Element("Address") != null ? mqttConfig.Element("Address")?.Value : "";
+                txtClientId.Text = mqttConfig.Element("ClientId") != null ? mqttConfig.Element("ClientId")?.Value : "";
+                txtUserName.Text = mqttConfig.Element("UserName") != null ? mqttConfig.Element("UserName")?.Value : "";
+                txtPassword.Text = mqttConfig.Element("Password") != null ? mqttConfig.Element("Password")?.Value : "";
                 //txtAddress.Text = mqqttConfig.Element("IsTls").Value;
 
                 decimal port = 1883;
-                if (!string.IsNullOrWhiteSpace(mqqttConfig.Element("Port")?.Value))
+                if (!string.IsNullOrWhiteSpace(mqttConfig.Element("Port")?.Value))
                 {
-                    decimal.TryParse(mqqttConfig.Element("Port")?.Value, out port);
+                    decimal.TryParse(mqttConfig.Element("Port")?.Value, out port);
                 }
                 txtPort.Value = port;
             }
@@ -67,8 +68,9 @@ namespace OPCForm
                     };
                     // 启动Mqtt             
                     mqttClientService.MqttMessage += Mqtt_Message;// 订阅消息
-                    await mqttClientService.MqttClientStart(config);
-                    mqttClientService.IsStart = true;//记录开始状态
+
+                    if (await mqttClientService.MqttClientStart(config))
+                        mqttClientService.IsStart = true;//记录开始状态
 
                 }).Start();
             }
@@ -76,19 +78,33 @@ namespace OPCForm
 
         private async void btnStop_Click(object sender, EventArgs e)
         {
+            if (!mqttClientService.IsStart)
+            {
+                return;
+            }
+
             if (mqttClientService.mqttClient.IsConnected)
             {
                 await mqttClientService.MqttClientStop();
-                mqttClientService.IsStart = false;
+                mqttClientService = new MqttClientService();
+                //mqttClientService.IsStart = false;
             }
         }
 
 
         private async void txtSubscribe_Click(object sender, EventArgs e)
         {
+            if (!mqttClientService.IsStart)
+            {
+                return;
+            }
+
             if (mqttClientService.mqttClient.IsConnected)
             {
-                await mqttClientService.SubscribeAsync(txtTopic.Text, MqttQualityOfServiceLevel.AtLeastOnce);
+                if (await mqttClientService.SubscribeAsync(txtTopic.Text, MqttQualityOfServiceLevel.AtLeastOnce))
+                {
+                    listSubscribe.Items.Add(txtTopic.Text);
+                }
             }
             else
             {
@@ -98,9 +114,29 @@ namespace OPCForm
 
         private async void btnUnSubscribe_Click(object sender, EventArgs e)
         {
+            if (!mqttClientService.IsStart)
+            {
+                return;
+            }
+            //判断是否已订阅         
+            if (listSubscribe.Items.Count == 0)
+            {
+                MessageBox.Show("请先订阅节点");
+                return;
+            }
+            if (listSubscribe.SelectedIndex == -1)
+            {
+                MessageBox.Show("请选择要取消订阅的节点");
+                return;
+            }
+            var topic = listSubscribe.SelectedItem.ToString();
+
             if (mqttClientService.mqttClient.IsConnected)
             {
-                await mqttClientService.UnsubscribeAsync(txtTopic.Text);
+                if (await mqttClientService.UnsubscribeAsync(topic))
+                {
+                    listSubscribe.Items.Remove(topic);
+                }
             }
             else
             {
@@ -110,6 +146,23 @@ namespace OPCForm
 
         private async void btnSend_Click(object sender, EventArgs e)
         {
+            //判断是否已订阅         
+            if (listSubscribe.Items.Count == 0)
+            {
+                MessageBox.Show("请先订阅主题");
+                return;
+            }
+            if (!listSubscribe.Items.Contains(txtTopic.Text))
+            {
+                MessageBox.Show("订阅主题不存在");
+                return;
+            }
+
+            if (!mqttClientService.IsStart)
+            {
+                return;
+            }
+
             if (mqttClientService.mqttClient.IsConnected)
             {
                 if (!string.IsNullOrWhiteSpace(txtSend.Text.Trim()))
@@ -132,7 +185,7 @@ namespace OPCForm
 
         private void txtClear_Click(object sender, EventArgs e)
         {
-            txtMessage.Text = "";
+            msgListView.Items.Clear();
         }
 
         /// <summary>
@@ -142,19 +195,21 @@ namespace OPCForm
         private void Mqtt_Message(object sender)
         {
             BeginInvoke(new Action(() =>
-            {
-                if (sender.GetType() == typeof(MqttSignal))
-                {
-                    MqttSignal m = sender as MqttSignal;
-                    txtMessage.Text += m.Data + "\r\n";
-                }
-            }));
+           {
+               if (sender.GetType() == typeof(MqttSignal))
+               {
+                   MqttSignal m = sender as MqttSignal;
+                   Addlog(m.Type, m.Data);
+                   //txtMessage.Text += m.Data + "\r\n";
+                   //PrintLog(0, m.Data);                 
+               }
+           }));
         }
 
         private void btnSave_Click(object sender, EventArgs e)
         {
             try
-            {               
+            {
                 XDocument doc = XDocument.Load(path);
                 XElement xel = doc.Element("MqttConfig");
                 xel.SetElementValue("Address", txtAddress.Text.Trim());
@@ -172,6 +227,85 @@ namespace OPCForm
                 MessageBox.Show("保存异常" + ex.Message);
             }
         }
+
+        private void listSubscribe_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            int index = this.listSubscribe.IndexFromPoint(e.Location);
+            if (index != ListBox.NoMatches)
+            {
+                // MessageBox.Show(this.listSubscribe.SelectedItem.ToString()); //执行双击事件
+                txtTopic.Text = listSubscribe.SelectedItem.ToString();
+            }
+            else
+            {
+                listSubscribe.SelectedIndex = -1;//不做任何操作，将ListBox的选中项取消
+            }
+        }
+
+        #region 日志       
+
+        private void InitListView(ListView listView, ImageList imageList)
+        {
+            ColumnHeader logTime = new ColumnHeader() { Name = "logTime", Text = "时间", Width = 240 };
+            ColumnHeader logMsg = new ColumnHeader() { Name = "logMsg", Text = "消息", Width = 850 };
+            listView.Columns.AddRange(new ColumnHeader[] { logTime, logMsg });
+            listView.View = View.Details;
+            listView.SmallImageList = imageList;
+        }
+
+        private void Addlog(int imageIndex, string info)
+        {
+            Color color;
+            switch (imageIndex)
+            {
+                case 0:
+                    color = Color.Red;
+                    break;
+                case 2:
+                    color = Color.Green;
+                    break;
+                case 3:
+                    color = Color.Orange;
+                    break;
+                default:
+                    color = Color.Black;
+                    break;
+            }
+            Addlog(msgListView, imageIndex, info, color);
+        }
+
+        private void Addlog(ListView listView, int imageIndex, string info, Color color, int maxDisplayItems = 100)
+        {
+            if (listView.InvokeRequired)
+            {
+                listView.Invoke(new Action(() =>
+                {
+                    if (listView.Items.Count > maxDisplayItems)
+                    {
+                        listView.Items.RemoveAt(maxDisplayItems);
+                    }
+
+                    ListViewItem listItem = new ListViewItem(" " + DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fff"), imageIndex);
+                    listItem.ForeColor = color;
+                    listItem.SubItems.Add(info);
+                    listView.Items.Insert(0, listItem);
+                }));
+            }
+            else
+            {
+                if (listView.Items.Count > maxDisplayItems)
+                {
+                    listView.Items.RemoveAt(maxDisplayItems);
+                }
+
+                ListViewItem listItem = new ListViewItem(" " + DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fff"), imageIndex);
+                listItem.ForeColor = color;
+                listItem.SubItems.Add(info);
+                listView.Items.Insert(0, listItem);
+            }
+        }
+
+        #endregion      
 
     }
 }

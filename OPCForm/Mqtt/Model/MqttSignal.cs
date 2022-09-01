@@ -15,9 +15,12 @@ namespace OPCForm.Mqtt
     {
         /// <summary>
         /// 类型
-        /// <para>0：异常消息</para>
-        /// <para>1：日志消息</para>
-        /// <para>2：接收到数据</para>
+        /// <para>0:异常消息</para>
+        /// <para>1:日志消息</para>
+        /// <para>2:发送数据</para>
+        /// <para>3:接收数据</para>
+        /// <para>4:订阅主题</para>
+        /// <para>5:取消主题</para>
         /// </summary>
         public int Type { get; set; }
 

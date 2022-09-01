@@ -481,10 +481,10 @@ namespace OPCForm
 
         private void Addlog(int imageIndex, string node, string info)
         {
-            Addlog(logListView, logImageList, imageIndex, node, info, 20);
+            Addlog(logListView, logImageList, imageIndex, node, info);
         }
 
-        private void Addlog(ListView listView, ImageList imageList, int imageIndex, string node, string info, int maxDisplayItems)
+        private void Addlog(ListView listView, ImageList imageList, int imageIndex, string node, string info, int maxDisplayItems = 100)
         {
             if (listView.InvokeRequired)
             {

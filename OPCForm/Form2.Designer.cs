@@ -28,6 +28,8 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form2));
             this.labClientId = new System.Windows.Forms.Label();
             this.labUserName = new System.Windows.Forms.Label();
             this.labPassword = new System.Windows.Forms.Label();
@@ -42,20 +44,23 @@
             this.btnStop = new System.Windows.Forms.Button();
             this.txtTopic = new System.Windows.Forms.TextBox();
             this.labTopic = new System.Windows.Forms.Label();
-            this.txtMessage = new System.Windows.Forms.TextBox();
             this.txtSend = new System.Windows.Forms.TextBox();
             this.btnSend = new System.Windows.Forms.Button();
             this.txtPort = new System.Windows.Forms.NumericUpDown();
             this.txtClear = new System.Windows.Forms.Button();
             this.txtSubscribe = new System.Windows.Forms.Button();
             this.btnUnSubscribe = new System.Windows.Forms.Button();
+            this.listSubscribe = new System.Windows.Forms.ListBox();
+            this.msgListView = new System.Windows.Forms.ListView();
+            this.msgImageList = new System.Windows.Forms.ImageList(this.components);
+            this.labSubscribeList = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.txtPort)).BeginInit();
             this.SuspendLayout();
             // 
             // labClientId
             // 
             this.labClientId.AutoSize = true;
-            this.labClientId.Location = new System.Drawing.Point(91, 180);
+            this.labClientId.Location = new System.Drawing.Point(66, 180);
             this.labClientId.Name = "labClientId";
             this.labClientId.Size = new System.Drawing.Size(54, 20);
             this.labClientId.TabIndex = 0;
@@ -64,7 +69,7 @@
             // labUserName
             // 
             this.labUserName.AutoSize = true;
-            this.labUserName.Location = new System.Drawing.Point(91, 232);
+            this.labUserName.Location = new System.Drawing.Point(66, 232);
             this.labUserName.Name = "labUserName";
             this.labUserName.Size = new System.Drawing.Size(54, 20);
             this.labUserName.TabIndex = 1;
@@ -73,7 +78,7 @@
             // labPassword
             // 
             this.labPassword.AutoSize = true;
-            this.labPassword.Location = new System.Drawing.Point(91, 283);
+            this.labPassword.Location = new System.Drawing.Point(66, 283);
             this.labPassword.Name = "labPassword";
             this.labPassword.Size = new System.Drawing.Size(39, 20);
             this.labPassword.TabIndex = 2;
@@ -81,31 +86,28 @@
             // 
             // txtClientId
             // 
-            this.txtClientId.Location = new System.Drawing.Point(163, 177);
+            this.txtClientId.Location = new System.Drawing.Point(138, 177);
             this.txtClientId.Name = "txtClientId";
             this.txtClientId.Size = new System.Drawing.Size(368, 27);
             this.txtClientId.TabIndex = 2;
-            this.txtClientId.Text = "mytest";
             // 
             // txtUserName
             // 
-            this.txtUserName.Location = new System.Drawing.Point(163, 229);
+            this.txtUserName.Location = new System.Drawing.Point(138, 229);
             this.txtUserName.Name = "txtUserName";
             this.txtUserName.Size = new System.Drawing.Size(368, 27);
             this.txtUserName.TabIndex = 3;
-            this.txtUserName.Text = "admin";
             // 
             // txtPassword
             // 
-            this.txtPassword.Location = new System.Drawing.Point(163, 280);
+            this.txtPassword.Location = new System.Drawing.Point(138, 280);
             this.txtPassword.Name = "txtPassword";
             this.txtPassword.Size = new System.Drawing.Size(368, 27);
             this.txtPassword.TabIndex = 4;
-            this.txtPassword.Text = "123qwe";
             // 
             // btnSave
             // 
-            this.btnSave.Location = new System.Drawing.Point(170, 606);
+            this.btnSave.Location = new System.Drawing.Point(379, 329);
             this.btnSave.Name = "btnSave";
             this.btnSave.Size = new System.Drawing.Size(94, 29);
             this.btnSave.TabIndex = 10;
@@ -116,7 +118,7 @@
             // labAddress
             // 
             this.labAddress.AutoSize = true;
-            this.labAddress.Location = new System.Drawing.Point(93, 71);
+            this.labAddress.Location = new System.Drawing.Point(68, 71);
             this.labAddress.Name = "labAddress";
             this.labAddress.Size = new System.Drawing.Size(52, 20);
             this.labAddress.TabIndex = 7;
@@ -125,7 +127,7 @@
             // labPort
             // 
             this.labPort.AutoSize = true;
-            this.labPort.Location = new System.Drawing.Point(99, 122);
+            this.labPort.Location = new System.Drawing.Point(74, 122);
             this.labPort.Name = "labPort";
             this.labPort.Size = new System.Drawing.Size(39, 20);
             this.labPort.TabIndex = 8;
@@ -133,15 +135,14 @@
             // 
             // txtAddress
             // 
-            this.txtAddress.Location = new System.Drawing.Point(163, 68);
+            this.txtAddress.Location = new System.Drawing.Point(138, 68);
             this.txtAddress.Name = "txtAddress";
             this.txtAddress.Size = new System.Drawing.Size(368, 27);
             this.txtAddress.TabIndex = 0;
-            this.txtAddress.Text = "10.47.102.70";
             // 
             // btnStart
             // 
-            this.btnStart.Location = new System.Drawing.Point(167, 329);
+            this.btnStart.Location = new System.Drawing.Point(142, 329);
             this.btnStart.Name = "btnStart";
             this.btnStart.Size = new System.Drawing.Size(94, 29);
             this.btnStart.TabIndex = 5;
@@ -151,7 +152,7 @@
             // 
             // btnStop
             // 
-            this.btnStop.Location = new System.Drawing.Point(287, 329);
+            this.btnStop.Location = new System.Drawing.Point(262, 329);
             this.btnStop.Name = "btnStop";
             this.btnStop.Size = new System.Drawing.Size(94, 29);
             this.btnStop.TabIndex = 6;
@@ -161,43 +162,34 @@
             // 
             // txtTopic
             // 
-            this.txtTopic.Location = new System.Drawing.Point(163, 415);
+            this.txtTopic.Location = new System.Drawing.Point(667, 68);
             this.txtTopic.Name = "txtTopic";
-            this.txtTopic.Size = new System.Drawing.Size(368, 27);
+            this.txtTopic.Size = new System.Drawing.Size(536, 27);
             this.txtTopic.TabIndex = 7;
             this.txtTopic.Text = "opc/pc/test";
             // 
             // labTopic
             // 
             this.labTopic.AutoSize = true;
-            this.labTopic.Location = new System.Drawing.Point(106, 418);
+            this.labTopic.Location = new System.Drawing.Point(610, 71);
             this.labTopic.Name = "labTopic";
             this.labTopic.Size = new System.Drawing.Size(39, 20);
             this.labTopic.TabIndex = 14;
             this.labTopic.Text = "主题";
             // 
-            // txtMessage
-            // 
-            this.txtMessage.Location = new System.Drawing.Point(561, 68);
-            this.txtMessage.Multiline = true;
-            this.txtMessage.Name = "txtMessage";
-            this.txtMessage.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txtMessage.Size = new System.Drawing.Size(557, 439);
-            this.txtMessage.TabIndex = 11;
-            // 
             // txtSend
             // 
-            this.txtSend.Location = new System.Drawing.Point(561, 622);
+            this.txtSend.Location = new System.Drawing.Point(26, 419);
             this.txtSend.Multiline = true;
             this.txtSend.Name = "txtSend";
-            this.txtSend.Size = new System.Drawing.Size(557, 149);
+            this.txtSend.Size = new System.Drawing.Size(480, 127);
             this.txtSend.TabIndex = 16;
             // 
             // btnSend
             // 
-            this.btnSend.Location = new System.Drawing.Point(1015, 587);
+            this.btnSend.Location = new System.Drawing.Point(529, 456);
             this.btnSend.Name = "btnSend";
-            this.btnSend.Size = new System.Drawing.Size(94, 29);
+            this.btnSend.Size = new System.Drawing.Size(94, 44);
             this.btnSend.TabIndex = 17;
             this.btnSend.Text = "发送消息";
             this.btnSend.UseVisualStyleBackColor = true;
@@ -205,7 +197,7 @@
             // 
             // txtPort
             // 
-            this.txtPort.Location = new System.Drawing.Point(163, 122);
+            this.txtPort.Location = new System.Drawing.Point(138, 122);
             this.txtPort.Maximum = new decimal(new int[] {
             100000,
             0,
@@ -222,7 +214,7 @@
             // 
             // txtClear
             // 
-            this.txtClear.Location = new System.Drawing.Point(583, 517);
+            this.txtClear.Location = new System.Drawing.Point(26, 562);
             this.txtClear.Name = "txtClear";
             this.txtClear.Size = new System.Drawing.Size(94, 29);
             this.txtClear.TabIndex = 12;
@@ -232,7 +224,7 @@
             // 
             // txtSubscribe
             // 
-            this.txtSubscribe.Location = new System.Drawing.Point(170, 486);
+            this.txtSubscribe.Location = new System.Drawing.Point(1076, 113);
             this.txtSubscribe.Name = "txtSubscribe";
             this.txtSubscribe.Size = new System.Drawing.Size(94, 29);
             this.txtSubscribe.TabIndex = 8;
@@ -242,7 +234,7 @@
             // 
             // btnUnSubscribe
             // 
-            this.btnUnSubscribe.Location = new System.Drawing.Point(298, 486);
+            this.btnUnSubscribe.Location = new System.Drawing.Point(1088, 517);
             this.btnUnSubscribe.Name = "btnUnSubscribe";
             this.btnUnSubscribe.Size = new System.Drawing.Size(94, 29);
             this.btnUnSubscribe.TabIndex = 9;
@@ -250,18 +242,59 @@
             this.btnUnSubscribe.UseVisualStyleBackColor = true;
             this.btnUnSubscribe.Click += new System.EventHandler(this.btnUnSubscribe_Click);
             // 
+            // listSubscribe
+            // 
+            this.listSubscribe.FormattingEnabled = true;
+            this.listSubscribe.ItemHeight = 20;
+            this.listSubscribe.Location = new System.Drawing.Point(667, 157);
+            this.listSubscribe.Name = "listSubscribe";
+            this.listSubscribe.Size = new System.Drawing.Size(536, 324);
+            this.listSubscribe.TabIndex = 18;
+            this.listSubscribe.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.listSubscribe_MouseDoubleClick);
+            // 
+            // msgListView
+            // 
+            this.msgListView.Location = new System.Drawing.Point(26, 607);
+            this.msgListView.Name = "msgListView";
+            this.msgListView.Size = new System.Drawing.Size(1177, 214);
+            this.msgListView.TabIndex = 19;
+            this.msgListView.UseCompatibleStateImageBehavior = false;
+            // 
+            // msgImageList
+            // 
+            this.msgImageList.ColorDepth = System.Windows.Forms.ColorDepth.Depth8Bit;
+            this.msgImageList.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("msgImageList.ImageStream")));
+            this.msgImageList.TransparentColor = System.Drawing.Color.Transparent;
+            this.msgImageList.Images.SetKeyName(0, "error.png");
+            this.msgImageList.Images.SetKeyName(1, "success.png");
+            this.msgImageList.Images.SetKeyName(2, "send.png");
+            this.msgImageList.Images.SetKeyName(3, "message.png");
+            this.msgImageList.Images.SetKeyName(4, "subscribe.png");
+            this.msgImageList.Images.SetKeyName(5, "warning.png");
+            // 
+            // labSubscribeList
+            // 
+            this.labSubscribeList.AutoSize = true;
+            this.labSubscribeList.Location = new System.Drawing.Point(592, 232);
+            this.labSubscribeList.Name = "labSubscribeList";
+            this.labSubscribeList.Size = new System.Drawing.Size(69, 20);
+            this.labSubscribeList.TabIndex = 20;
+            this.labSubscribeList.Text = "主题列表";
+            // 
             // Form2
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1228, 833);
+            this.Controls.Add(this.labSubscribeList);
+            this.Controls.Add(this.msgListView);
+            this.Controls.Add(this.listSubscribe);
             this.Controls.Add(this.btnUnSubscribe);
             this.Controls.Add(this.txtSubscribe);
             this.Controls.Add(this.txtClear);
             this.Controls.Add(this.txtPort);
             this.Controls.Add(this.btnSend);
             this.Controls.Add(this.txtSend);
-            this.Controls.Add(this.txtMessage);
             this.Controls.Add(this.labTopic);
             this.Controls.Add(this.txtTopic);
             this.Controls.Add(this.btnStop);
@@ -300,12 +333,15 @@
         private Button btnStop;
         private TextBox txtTopic;
         private Label labTopic;
-        private TextBox txtMessage;
         private TextBox txtSend;
         private Button btnSend;
         private NumericUpDown txtPort;
         private Button txtClear;
         private Button txtSubscribe;
         private Button btnUnSubscribe;
+        private ListBox listSubscribe;
+        private ListView msgListView;
+        private ImageList msgImageList;
+        private Label labSubscribeList;
     }
 }
