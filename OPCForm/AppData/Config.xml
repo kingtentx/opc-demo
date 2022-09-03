@@ -1,9 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<MqttConfig>
-  <Address>127.0.0.1</Address>
-  <Port>10086</Port>
-  <ClientId>demo2</ClientId>
-  <UserName>demo2</UserName>
-  <Password>123qwe</Password>
-  <IsTls>false</IsTls>
-</MqttConfig>

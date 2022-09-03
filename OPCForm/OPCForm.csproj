@@ -10,6 +10,10 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.8">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="6.0.8" />
     <PackageReference Include="MQTTnet" Version="4.1.0.247" />
@@ -21,7 +25,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="AppData\Config.xml">
+    <ProjectReference Include="..\OPC.Data\OPC.Data.csproj" />
+    <ProjectReference Include="..\OPC.Repository\OPC.Repository.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="AppConfig\Config.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="AppData\OpcDB.db">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

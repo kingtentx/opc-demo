@@ -54,6 +54,9 @@
             this.txtTime = new System.Windows.Forms.NumericUpDown();
             this.chkIsLoop = new System.Windows.Forms.CheckBox();
             this.btnClearLog = new System.Windows.Forms.Button();
+            this.chkPush = new System.Windows.Forms.CheckBox();
+            this.btnSave = new System.Windows.Forms.Button();
+            this.button1 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.txtTime)).BeginInit();
             this.SuspendLayout();
             // 
@@ -81,7 +84,6 @@
             this.txtPassword.Name = "txtPassword";
             this.txtPassword.Size = new System.Drawing.Size(294, 27);
             this.txtPassword.TabIndex = 14;
-            this.txtPassword.Text = "123456";
             // 
             // txtUserName
             // 
@@ -89,7 +91,6 @@
             this.txtUserName.Name = "txtUserName";
             this.txtUserName.Size = new System.Drawing.Size(294, 27);
             this.txtUserName.TabIndex = 13;
-            this.txtUserName.Text = "user";
             // 
             // labServer
             // 
@@ -116,7 +117,7 @@
             this.txtAddress.Name = "txtAddress";
             this.txtAddress.Size = new System.Drawing.Size(801, 27);
             this.txtAddress.TabIndex = 10;
-            this.txtAddress.Text = "opc.tcp://localhost:4840";
+            this.txtAddress.Text = "opc.tcp://127.0.0.1:49320";
             // 
             // nodesTreeView
             // 
@@ -172,7 +173,7 @@
             // 
             // btnRead
             // 
-            this.btnRead.Location = new System.Drawing.Point(311, 449);
+            this.btnRead.Location = new System.Drawing.Point(311, 343);
             this.btnRead.Name = "btnRead";
             this.btnRead.Size = new System.Drawing.Size(94, 29);
             this.btnRead.TabIndex = 20;
@@ -183,7 +184,7 @@
             // labTime
             // 
             this.labTime.AutoSize = true;
-            this.labTime.Location = new System.Drawing.Point(308, 384);
+            this.labTime.Location = new System.Drawing.Point(308, 278);
             this.labTime.Name = "labTime";
             this.labTime.Size = new System.Drawing.Size(79, 20);
             this.labTime.TabIndex = 22;
@@ -191,7 +192,7 @@
             // 
             // btnSubscription
             // 
-            this.btnSubscription.Location = new System.Drawing.Point(575, 449);
+            this.btnSubscription.Location = new System.Drawing.Point(575, 343);
             this.btnSubscription.Name = "btnSubscription";
             this.btnSubscription.Size = new System.Drawing.Size(94, 29);
             this.btnSubscription.TabIndex = 23;
@@ -202,7 +203,7 @@
             // btnUnSubscription
             // 
             this.btnUnSubscription.ForeColor = System.Drawing.Color.Black;
-            this.btnUnSubscription.Location = new System.Drawing.Point(692, 449);
+            this.btnUnSubscription.Location = new System.Drawing.Point(692, 343);
             this.btnUnSubscription.Name = "btnUnSubscription";
             this.btnUnSubscription.Size = new System.Drawing.Size(94, 29);
             this.btnUnSubscription.TabIndex = 24;
@@ -252,7 +253,7 @@
             0,
             0,
             0});
-            this.txtTime.Location = new System.Drawing.Point(402, 380);
+            this.txtTime.Location = new System.Drawing.Point(402, 274);
             this.txtTime.Maximum = new decimal(new int[] {
             10000,
             0,
@@ -275,7 +276,7 @@
             // chkIsLoop
             // 
             this.chkIsLoop.AutoSize = true;
-            this.chkIsLoop.Location = new System.Drawing.Point(411, 452);
+            this.chkIsLoop.Location = new System.Drawing.Point(411, 346);
             this.chkIsLoop.Name = "chkIsLoop";
             this.chkIsLoop.Size = new System.Drawing.Size(91, 24);
             this.chkIsLoop.TabIndex = 33;
@@ -293,11 +294,44 @@
             this.btnClearLog.UseVisualStyleBackColor = true;
             this.btnClearLog.Click += new System.EventHandler(this.btnClearLog_Click);
             // 
+            // chkPush
+            // 
+            this.chkPush.AutoSize = true;
+            this.chkPush.Location = new System.Drawing.Point(575, 409);
+            this.chkPush.Name = "chkPush";
+            this.chkPush.Size = new System.Drawing.Size(97, 24);
+            this.chkPush.TabIndex = 35;
+            this.chkPush.Text = "mqtt推送";
+            this.chkPush.UseVisualStyleBackColor = true;
+            // 
+            // btnSave
+            // 
+            this.btnSave.Location = new System.Drawing.Point(311, 409);
+            this.btnSave.Name = "btnSave";
+            this.btnSave.Size = new System.Drawing.Size(94, 29);
+            this.btnSave.TabIndex = 36;
+            this.btnSave.Text = "保存设备";
+            this.btnSave.UseVisualStyleBackColor = true;
+            this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(456, 475);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(94, 29);
+            this.button1.TabIndex = 37;
+            this.button1.Text = "button1";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1228, 833);
+            this.Controls.Add(this.button1);
+            this.Controls.Add(this.btnSave);
+            this.Controls.Add(this.chkPush);
             this.Controls.Add(this.btnClearLog);
             this.Controls.Add(this.chkIsLoop);
             this.Controls.Add(this.txtTime);
@@ -353,5 +387,8 @@
         private ColumnHeader infoTime;
         private CheckBox chkIsLoop;
         private Button btnClearLog;
+        private CheckBox chkPush;
+        private Button btnSave;
+        private Button button1;
     }
 }

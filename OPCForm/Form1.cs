@@ -11,6 +11,9 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Newtonsoft.Json;
 using System.Collections.Concurrent;
+using System.Xml.Linq;
+using OPC.Repository;
+using OPC.Data;
 
 namespace OPCForm
 {
@@ -22,13 +25,39 @@ namespace OPCForm
         private static List<SubscriptionInfo> subscriptionList = new List<SubscriptionInfo>();
         private static string currentNodeId;
         private bool IsLoop = false;
+        private string path;
+        private IRepository<User> _userRepository;
 
         public Form1()
-        {
-            this.client = new OpcClient();
+        {          
             InitializeComponent();
+
+            this.client = new OpcClient();
             InitListView(logListView, logImageList);
+
+            #region 获取数据表
+
+            _userRepository = (IRepository<User>)Program.ServiceProvider.GetService(typeof(IRepository<User>));
+
+            #endregion
+           
+#if DEBUG
+            path = Common.GetApplicationPath() + "AppConfig/Config.xml";
+#else
+            path = AppDomain.CurrentDomain.BaseDirectory + "AppConfig/Config.xml";
+#endif
+            XDocument doc = XDocument.Load(path);
+
+            XElement mqttConfig = doc.Element("Root").Element("OpcConfig");
+            if (mqttConfig != null)
+            {
+                txtAddress.Text = mqttConfig.Element("Address") != null ? mqttConfig.Element("Address")?.Value : "";
+                txtUserName.Text = mqttConfig.Element("UserName") != null ? mqttConfig.Element("UserName")?.Value : "";
+                txtPassword.Text = mqttConfig.Element("Password") != null ? mqttConfig.Element("Password")?.Value : "";
+            }
+
         }
+      
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
             this.client.Disconnect();
@@ -52,11 +81,11 @@ namespace OPCForm
                 ShowMessage("登录", "请输入opc服务器地址");
                 return;
             }
-            if (string.IsNullOrWhiteSpace(txtUserName.Text) || string.IsNullOrWhiteSpace(txtPassword.Text))
-            {
-                ShowMessage("登录", "请输入用户名或密码！");
-                return;
-            }
+            //if (string.IsNullOrWhiteSpace(txtUserName.Text) || string.IsNullOrWhiteSpace(txtPassword.Text))
+            //{
+            //    ShowMessage("登录", "请输入用户名或密码！");
+            //    return;
+            //}
 
             this.client.Disconnect();
 
@@ -67,9 +96,9 @@ namespace OPCForm
                 if (this.Connect(txtAddress.Text, txtUserName.Text, txtPassword.Text))
                 {
                     btnConnect.Enabled = false;
-                    btnConnect.ForeColor = System.Drawing.Color.White;
+                    btnConnect.ForeColor = Color.White;
                     btnStop.Enabled = true;
-                    btnStop.ForeColor = System.Drawing.Color.Black;
+                    btnStop.ForeColor = Color.Black;
                     this.Browse();
                 }
 
@@ -87,7 +116,12 @@ namespace OPCForm
             try
             {
                 client = new OpcClient(address);
-                client.Security.UserIdentity = new OpcClientIdentity(name, password);
+                if (!string.IsNullOrWhiteSpace(name) && !string.IsNullOrWhiteSpace(password))
+                {
+                    client.Security.UserIdentity = new OpcClientIdentity(name, password);
+                }
+
+
                 this.client.Connect();
                 result = true;
             }
@@ -330,15 +364,17 @@ namespace OPCForm
         {
             var nodeInfo = client.BrowseNode(rootNodeId);
 
-            if (nodeInfo.Children().Count() > 0)
-            {
-                foreach (var childNode in nodeInfo.Children())
-                    yield return new OpcSubscribeDataChange(childNode.NodeId, HandleDataChange);
-            }
-            else
-            {
-                yield return new OpcSubscribeDataChange(nodeInfo.NodeId, HandleDataChange);
-            }
+            yield return new OpcSubscribeDataChange(nodeInfo.NodeId, HandleDataChange);
+
+            //if (nodeInfo.Children().Count() > 0)
+            //{
+            //    foreach (var childNode in nodeInfo.Children())
+            //        yield return new OpcSubscribeDataChange(childNode.NodeId, HandleDataChange);
+            //}
+            //else
+            //{
+            //    yield return new OpcSubscribeDataChange(nodeInfo.NodeId, HandleDataChange);
+            //}
 
         }
 
@@ -532,6 +568,38 @@ namespace OPCForm
         private void btnClearLog_Click(object sender, EventArgs e)
         {
             logListView.Items.Clear();
+        }
+
+        private void btnSave_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                XDocument doc = XDocument.Load(path);
+                XElement xel = doc.Element("Root").Element("OpcConfig");
+                xel.SetElementValue("Address", txtAddress.Text.Trim());
+                xel.SetElementValue("UserName", txtUserName.Text.Trim());
+                xel.SetElementValue("Password", txtPassword.Text.Trim());
+                doc.Save(path);
+
+                MessageBox.Show("保存成功");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("保存异常" + ex.Message);
+            }
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            //var user = _userRepository.GetList(p => p.Name=="test").ToList();
+            var user = new User()
+            {
+                Name = "123",
+                Password="123qwe"
+            };
+            _userRepository.Add(user);
+
+            MessageBox.Show(_userRepository.GetList(p => p.Name.Equals("123")).FirstOrDefault().Name);
         }
     }
 }

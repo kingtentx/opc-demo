@@ -28,13 +28,13 @@ namespace OPCForm
             InitListView(msgListView, msgImageList);
 
 #if DEBUG
-            path = Common.GetApplicationPath() + "AppData/Config.xml";
+            path = Common.GetApplicationPath() + "AppConfig/Config.xml";
 #else
-            path = AppDomain.CurrentDomain.BaseDirectory + "AppData/Config.xml";
+            path = AppDomain.CurrentDomain.BaseDirectory + "AppConfig/Config.xml";
 #endif
             XDocument doc = XDocument.Load(path);
 
-            XElement mqttConfig = doc.Element("MqttConfig");
+            XElement mqttConfig = doc.Element("Root").Element("MqttConfig");
             if (mqttConfig != null)
             {
                 txtAddress.Text = mqttConfig.Element("Address") != null ? mqttConfig.Element("Address")?.Value : "";
@@ -211,7 +211,7 @@ namespace OPCForm
             try
             {
                 XDocument doc = XDocument.Load(path);
-                XElement xel = doc.Element("MqttConfig");
+                XElement xel = doc.Element("Root").Element("MqttConfig");
                 xel.SetElementValue("Address", txtAddress.Text.Trim());
                 xel.SetElementValue("Port", txtPort.Value);
                 xel.SetElementValue("ClientId", txtClientId.Text.Trim());

@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Root>
+  <OpcConfig>
+    <Address>opc.tcp://10.47.24.51:49320</Address>
+    <UserName>opc-demo</UserName>
+    <Password>IoaRY5N3aRsKiJOr</Password>
+  </OpcConfig>
+  <MqttConfig>
+    <Address>127.0.0.1</Address>
+    <Port>1883</Port>
+    <ClientId>demo2</ClientId>
+    <UserName>demo2</UserName>
+    <Password>123qwe</Password>
+    <IsTls>false</IsTls>
+  </MqttConfig>
+</Root>
