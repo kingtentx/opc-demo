@@ -10,8 +10,8 @@ using OPC.Data;
 namespace OPC.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20220903030608_test2")]
-    partial class test2
+    [Migration("20220903031737_test1")]
+    partial class test1
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

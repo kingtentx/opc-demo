@@ -8,9 +8,7 @@ namespace OPC.Data
         public AppDbContext CreateDbContext(string[] args)
         {
             var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
-            optionsBuilder.UseSqlite("Data Source=OpcDB.db");
-            //optionsBuilder.UseSqlite(@"Data Source=|DataDirectory|\AppData\OpcDB.db");
-            //optionsBuilder.UseSqlite(@"|DataDirectory|\AppData\OpcDB.dbb");           
+            optionsBuilder.UseSqlite("Data Source=.\\AppData\\OpcDB.db");               
 
             return new AppDbContext(optionsBuilder.Options);
         }

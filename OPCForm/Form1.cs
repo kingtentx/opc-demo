@@ -14,6 +14,7 @@ using System.Collections.Concurrent;
 using System.Xml.Linq;
 using OPC.Repository;
 using OPC.Data;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace OPCForm
 {
@@ -29,7 +30,7 @@ namespace OPCForm
         private IRepository<User> _userRepository;
 
         public Form1()
-        {          
+        {
             InitializeComponent();
 
             this.client = new OpcClient();
@@ -40,7 +41,7 @@ namespace OPCForm
             _userRepository = (IRepository<User>)Program.ServiceProvider.GetService(typeof(IRepository<User>));
 
             #endregion
-           
+
 #if DEBUG
             path = Common.GetApplicationPath() + "AppConfig/Config.xml";
 #else
@@ -57,7 +58,7 @@ namespace OPCForm
             }
 
         }
-      
+
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
             this.client.Disconnect();
@@ -591,15 +592,18 @@ namespace OPCForm
 
         private void button1_Click(object sender, EventArgs e)
         {
-            //var user = _userRepository.GetList(p => p.Name=="test").ToList();
-            var user = new User()
-            {
-                Name = "123",
-                Password="123qwe"
-            };
-            _userRepository.Add(user);
 
-            MessageBox.Show(_userRepository.GetList(p => p.Name.Equals("123")).FirstOrDefault().Name);
+            //var user = new User()
+            //{
+            //    Name = "123",
+            //    Password = "123qwe"
+            //};
+            //_userRepository.Add(user);
+
+            //MessageBox.Show(_userRepository.GetList(p => p.Name.Equals("123")).FirstOrDefault().Name);
+
+            var list = _userRepository.GetList(p => p.Name == "123").FirstOrDefault();
+            MessageBox.Show(list != null ? list.Name : "-");
         }
     }
 }
