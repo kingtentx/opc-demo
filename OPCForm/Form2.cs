@@ -19,7 +19,7 @@ namespace OPCForm
 {
     public partial class Form2 : Form
     {
-        MqttClientService mqttClientService = new MqttClientService();
+        MqttClientService mqttClientService;
         private string path = AppConfig.GetXmlConfig;
         public Form2()
         {
@@ -47,21 +47,20 @@ namespace OPCForm
 
         private async void btnStart_Click(object sender, EventArgs e)
         {
-            if (!mqttClientService.IsStart)
+
+            if (mqttClientService == null)
             {
-                if (mqttClientService.mqttClient == null)
-                {
-                    Connect();
-                }
-                else if (!mqttClientService.mqttClient.IsConnected)
-                {
-                    Connect();
-                }
-                else
-                {
-                    mqttClientService = new MqttClientService();
-                }
+                Connect();
             }
+            else if (!mqttClientService.mqttClient.IsConnected)
+            {
+                Connect();
+            }
+            else
+            {
+                mqttClientService = new MqttClientService();
+            }
+
         }
 
         private void Connect()
@@ -81,14 +80,16 @@ namespace OPCForm
                 mqttClientService.MqttMessage += Mqtt_Message;// 订阅消息
 
                 if (await mqttClientService.MqttClientStart(config))
-                    mqttClientService.IsStart = true;//记录开始状态
+                {
+                    //mqttClientService.IsStart = true;//记录开始状态
+                }
 
             }).Start();
         }
 
         private async void btnStop_Click(object sender, EventArgs e)
         {
-            if (!mqttClientService.IsStart)
+            if (mqttClientService == null)
             {
                 return;
             }
@@ -96,14 +97,12 @@ namespace OPCForm
             if (mqttClientService.mqttClient.IsConnected)
             {
                 await mqttClientService.MqttClientStop();
-                mqttClientService = new MqttClientService();
-                //mqttClientService.IsStart = false;
             }
         }
 
         private async void txtSubscribe_Click(object sender, EventArgs e)
         {
-            if (!mqttClientService.IsStart)
+            if (mqttClientService == null)
             {
                 return;
             }
@@ -123,25 +122,27 @@ namespace OPCForm
 
         private async void btnUnSubscribe_Click(object sender, EventArgs e)
         {
-            if (!mqttClientService.IsStart)
+            if (mqttClientService == null)
             {
                 return;
             }
-            //判断是否已订阅         
-            if (listSubscribe.Items.Count == 0)
-            {
-                MessageBox.Show("请先订阅节点");
-                return;
-            }
-            if (listSubscribe.SelectedIndex == -1)
-            {
-                MessageBox.Show("请选择要取消订阅的节点");
-                return;
-            }
-            var topic = listSubscribe.SelectedItem.ToString();
 
             if (mqttClientService.mqttClient.IsConnected)
             {
+                //判断是否已订阅         
+                if (listSubscribe.Items.Count == 0)
+                {
+                    MessageBox.Show("请先订阅节点");
+                    return;
+                }
+                if (listSubscribe.SelectedIndex == -1)
+                {
+                    MessageBox.Show("请选择要取消订阅的节点");
+                    return;
+                }
+
+                var topic = listSubscribe.SelectedItem.ToString();
+
                 if (await mqttClientService.UnsubscribeAsync(topic))
                 {
                     listSubscribe.Items.Remove(topic);
@@ -155,25 +156,26 @@ namespace OPCForm
 
         private async void btnSend_Click(object sender, EventArgs e)
         {
-            //判断是否已订阅         
-            if (listSubscribe.Items.Count == 0)
+            if (mqttClientService == null)
             {
-                MessageBox.Show("请先订阅主题");
-                return;
-            }
-            if (!listSubscribe.Items.Contains(txtTopic.Text))
-            {
-                MessageBox.Show("订阅主题不存在");
                 return;
             }
 
-            if (!mqttClientService.IsStart)
-            {
-                return;
-            }
 
             if (mqttClientService.mqttClient.IsConnected)
             {
+                //判断是否已订阅         
+                if (listSubscribe.Items.Count == 0)
+                {
+                    MessageBox.Show("请先订阅主题");
+                    return;
+                }
+                if (!listSubscribe.Items.Contains(txtTopic.Text))
+                {
+                    MessageBox.Show("订阅主题不存在");
+                    return;
+                }
+
                 if (!string.IsNullOrWhiteSpace(txtSend.Text.Trim()))
                 {
                     if (await mqttClientService.PublishAsync(txtTopic.Text, txtSend.Text.Trim()))
@@ -209,8 +211,6 @@ namespace OPCForm
                {
                    MqttSignal m = sender as MqttSignal;
                    Addlog(m.Type, m.Data);
-                   //txtMessage.Text += m.Data + "\r\n";
-                   //PrintLog(0, m.Data);                 
                }
            }));
         }

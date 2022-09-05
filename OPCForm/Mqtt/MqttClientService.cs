@@ -25,7 +25,8 @@ namespace OPCForm.Mqtt
         /// </summary>
         public event InformHandle MqttMessage;
 
-        public bool IsStart = false;
+        //public bool IsStart = false;
+
         /// <summary>
         /// 发送消息
         /// </summary>
@@ -115,7 +116,7 @@ namespace OPCForm.Mqtt
         {
             ToSignal(new MqttSignal() { Type = 1, Data = $"客户端已断开与服务端的连接……" });
             //Log.Information($"客户端已断开与服务端的连接……");
-            this.IsStart = false;
+            //this.IsStart = false;
             await Task.CompletedTask;
         }
 
