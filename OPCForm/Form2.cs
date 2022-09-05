@@ -20,20 +20,13 @@ namespace OPCForm
     public partial class Form2 : Form
     {
         MqttClientService mqttClientService = new MqttClientService();
-        //private string path = AppDomain.CurrentDomain.BaseDirectory + "AppData/Config.xml";
-        private string path;
+        private string path = AppConfig.GetXmlConfig;
         public Form2()
         {
             InitializeComponent();
             InitListView(msgListView, msgImageList);
 
-#if DEBUG
-            path = Common.GetApplicationPath() + "AppConfig/Config.xml";
-#else
-            path = AppDomain.CurrentDomain.BaseDirectory + "AppConfig/Config.xml";
-#endif
             XDocument doc = XDocument.Load(path);
-
             XElement mqttConfig = doc.Element("Root").Element("MqttConfig");
             if (mqttConfig != null)
             {
@@ -56,24 +49,41 @@ namespace OPCForm
         {
             if (!mqttClientService.IsStart)
             {
-                new Task(async () =>
+                if (mqttClientService.mqttClient == null)
                 {
-                    var config = new MqttConfig()
-                    {
-                        Address = txtAddress.Text,
-                        Port = (int)txtPort.Value,
-                        ClientId = txtClientId.Text,
-                        UserName = txtUserName.Text,
-                        Password = txtPassword.Text
-                    };
-                    // 启动Mqtt             
-                    mqttClientService.MqttMessage += Mqtt_Message;// 订阅消息
-
-                    if (await mqttClientService.MqttClientStart(config))
-                        mqttClientService.IsStart = true;//记录开始状态
-
-                }).Start();
+                    Connect();
+                }
+                else if (!mqttClientService.mqttClient.IsConnected)
+                {
+                    Connect();
+                }
+                else
+                {
+                    mqttClientService = new MqttClientService();
+                }
             }
+        }
+
+        private void Connect()
+        {
+            mqttClientService = new MqttClientService();
+            new Task(async () =>
+            {
+                var config = new MqttConfig()
+                {
+                    Address = txtAddress.Text,
+                    Port = (int)txtPort.Value,
+                    ClientId = txtClientId.Text,
+                    UserName = txtUserName.Text,
+                    Password = txtPassword.Text
+                };
+                // 启动Mqtt             
+                mqttClientService.MqttMessage += Mqtt_Message;// 订阅消息
+
+                if (await mqttClientService.MqttClientStart(config))
+                    mqttClientService.IsStart = true;//记录开始状态
+
+            }).Start();
         }
 
         private async void btnStop_Click(object sender, EventArgs e)
@@ -90,7 +100,6 @@ namespace OPCForm
                 //mqttClientService.IsStart = false;
             }
         }
-
 
         private async void txtSubscribe_Click(object sender, EventArgs e)
         {
@@ -208,6 +217,8 @@ namespace OPCForm
 
         private void btnSave_Click(object sender, EventArgs e)
         {
+            //MessageBox.Show(Form1.mqtt.ToString());
+
             try
             {
                 XDocument doc = XDocument.Load(path);

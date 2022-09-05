@@ -8,9 +8,9 @@
   <MqttConfig>
     <Address>127.0.0.1</Address>
     <Port>1883</Port>
-    <ClientId>demo2</ClientId>
-    <UserName>demo2</UserName>
-    <Password>123qwe</Password>
+    <ClientId>demo23</ClientId>
+    <UserName>admin</UserName>
+    <Password>public</Password>
     <IsTls>false</IsTls>
   </MqttConfig>
 </Root>

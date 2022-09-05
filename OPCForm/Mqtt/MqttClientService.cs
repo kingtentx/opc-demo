@@ -76,9 +76,9 @@ namespace OPCForm.Mqtt
                 mqttClient.ConnectedAsync += _mqttClient_ConnectedAsync; // 客户端连接成功事件
                 mqttClient.DisconnectedAsync += _mqttClient_DisconnectedAsync; // 客户端连接关闭事件          
                 mqttClient.ApplicationMessageReceivedAsync += _mqttClient_ApplicationMessageReceivedAsync; // 收到消息事件
-              
+
                 await mqttClient.ConnectAsync(clientOptions);
-               
+
                 DateTime OutTime = DateTime.Now;
 
                 while (mqttClient != null && !mqttClient.IsConnected)
@@ -115,6 +115,7 @@ namespace OPCForm.Mqtt
         {
             ToSignal(new MqttSignal() { Type = 1, Data = $"客户端已断开与服务端的连接……" });
             //Log.Information($"客户端已断开与服务端的连接……");
+            this.IsStart = false;
             await Task.CompletedTask;
         }
 

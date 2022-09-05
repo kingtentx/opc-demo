@@ -14,7 +14,7 @@ namespace OPCForm
 #else
         private static string path = AppDomain.CurrentDomain.BaseDirectory;
 #endif
-        public static string GetConfig
+        public static string GetXmlConfig
         {
             get
             {

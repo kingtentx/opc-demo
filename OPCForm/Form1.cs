@@ -14,26 +14,28 @@ using System.Collections.Concurrent;
 using System.Xml.Linq;
 using OPC.Repository;
 using OPC.Data;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace OPCForm
 {
     public partial class Form1 : Form
     {
+        public static bool mqtt = false;
+
         private OpcClient client;
         private static List<ConsumerSubscriptionInfo> consumerList = new List<ConsumerSubscriptionInfo>();
         private static Dictionary<string, string> nodeList = new Dictionary<string, string>();
         private static List<SubscriptionInfo> subscriptionList = new List<SubscriptionInfo>();
         private static string currentNodeId;
         private bool IsLoop = false;
-        private string path;
+        private string path = AppConfig.GetXmlConfig;
         private IRepository<User> _userRepository;
 
         public Form1()
         {
             InitializeComponent();
-
+            //初始化opcClient
             this.client = new OpcClient();
+            //初始化listview
             InitListView(logListView, logImageList);
 
             #region 获取数据表
@@ -42,13 +44,8 @@ namespace OPCForm
 
             #endregion
 
-#if DEBUG
-            path = Common.GetApplicationPath() + "AppConfig/Config.xml";
-#else
-            path = AppDomain.CurrentDomain.BaseDirectory + "AppConfig/Config.xml";
-#endif
-            XDocument doc = XDocument.Load(path);
 
+            XDocument doc = XDocument.Load(path);
             XElement mqttConfig = doc.Element("Root").Element("OpcConfig");
             if (mqttConfig != null)
             {
@@ -590,20 +587,37 @@ namespace OPCForm
             }
         }
 
-        private void button1_Click(object sender, EventArgs e)
+
+        private void chkPush_CheckedChanged(object sender, EventArgs e)
         {
-
-            //var user = new User()
-            //{
-            //    Name = "123",
-            //    Password = "123qwe"
-            //};
-            //_userRepository.Add(user);
-
-            //MessageBox.Show(_userRepository.GetList(p => p.Name.Equals("123")).FirstOrDefault().Name);
-
-            var list = _userRepository.GetList(p => p.Name == "123").FirstOrDefault();
-            MessageBox.Show(list != null ? list.Name : "-");
+            if (chkPush.Checked)
+            {
+                //MessageBox.Show("保存成功");
+                //Form2 fr3 = new Form2("要传的值啊");
+                mqtt = true;
+            }
+            else
+            {
+                //Form2 fr3 = new Form2("");
+                //MessageBox.Show("保存失败");
+                mqtt = false;
+            }
         }
+
+        //private void button1_Click(object sender, EventArgs e)
+        //{
+
+        //    //var user = new User()
+        //    //{
+        //    //    Name = "123",
+        //    //    Password = "123qwe"
+        //    //};
+        //    //_userRepository.Add(user);
+
+        //    //MessageBox.Show(_userRepository.GetList(p => p.Name.Equals("123")).FirstOrDefault().Name);
+
+        //    var list = _userRepository.GetList(p => p.Name == "123").FirstOrDefault();
+        //    MessageBox.Show(list != null ? list.Name : "-");
+        //}
     }
 }
