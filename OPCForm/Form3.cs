@@ -34,5 +34,10 @@ namespace OPCForm
             var where = LambdaHelper.True<NodeInfo>();
             return _nodeinfoRepository.GetList(where);
         }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            dataGridView1.DataSource = GetList();
+        }
     }
 }

@@ -46,7 +46,7 @@ namespace OPCForm
             _nodeinfoRepository = (IRepository<NodeInfo>)Program.ServiceProvider.GetService(typeof(IRepository<NodeInfo>));
 
             #endregion
-
+           
 
             XDocument doc = XDocument.Load(path);
             XElement mqttConfig = doc.Element("Root").Element("OpcConfig");

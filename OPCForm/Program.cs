@@ -51,7 +51,7 @@ namespace OPCForm
             ApplicationConfiguration.Initialize();        
 
             ConfigureServices();
-            InitApp();
+            //InitApp();
 
             Application.Run(new Main());
             //Application.Run(new Form3());
