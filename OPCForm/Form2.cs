@@ -285,7 +285,7 @@ namespace OPCForm
             Addlog(msgListView, imageIndex, info, color);
         }
 
-        private void Addlog(ListView listView, int imageIndex, string info, Color color, int maxDisplayItems = 100)
+        private void Addlog(ListView listView, int imageIndex, string info, Color color, int maxDisplayItems = 50)
         {
             if (listView.InvokeRequired)
             {

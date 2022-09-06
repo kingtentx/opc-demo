@@ -36,15 +36,7 @@ namespace OPCForm
             //初始化opcClient
             this.client = new OpcClient();
             //初始化listview
-            InitListView(logListView, logImageList);
-
-            #region 获取数据表
-
-            //_userRepository = (IRepository<User>)Program.ServiceProvider.GetService(typeof(IRepository<User>));
-            //_nodeinfoRepository = (IRepository<NodeInfo>)Program.ServiceProvider.GetService(typeof(IRepository<NodeInfo>));
-
-            #endregion
-
+            InitListView(logListView, logImageList); 
 
             XDocument doc = XDocument.Load(path);
             XElement mqttConfig = doc.Element("Root").Element("OpcConfig");

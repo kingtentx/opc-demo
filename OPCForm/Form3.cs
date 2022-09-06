@@ -22,7 +22,7 @@ namespace OPCForm
         {
             InitializeComponent();
 
-            dataGridView1.DataSource = GetList();
+            BindData();
         }
 
         public List<NodeInfo> GetList()
@@ -37,7 +37,31 @@ namespace OPCForm
 
         private void button1_Click(object sender, EventArgs e)
         {
-            dataGridView1.DataSource = GetList();
+            BindData();
+        }
+
+        public void BindData()
+        {
+            dataGridView1.Columns.Clear();
+            dataGridView1.AutoGenerateColumns = false;
+
+            dataGridView1.Columns.Add("Id", "序号");
+            dataGridView1.Columns[0].DataPropertyName = "Id";
+
+            dataGridView1.Columns.Add("NodeName", "名称");
+            dataGridView1.Columns[1].DataPropertyName = "NodeName";
+
+            dataGridView1.Columns.Add("NodeId", "节点");
+            dataGridView1.Columns[2].DataPropertyName = "NodeId";
+            dataGridView1.Columns[2].Width = 320;
+
+            dataGridView1.Columns.Add("DataType", "数据类型");
+            dataGridView1.Columns[3].DataPropertyName = "DataType";
+
+            dataGridView1.Columns.Add("CreateTime", "添加时间");
+            dataGridView1.Columns[4].DataPropertyName = "CreateTime";
+
+            dataGridView1.DataSource = new BindingList<NodeInfo>(GetList());
         }
     }
 }
