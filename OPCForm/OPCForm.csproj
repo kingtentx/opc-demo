@@ -26,6 +26,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\OPC.Data\OPC.Data.csproj" />
+    <ProjectReference Include="..\OPC.Helper\OPC.Helper.csproj" />
     <ProjectReference Include="..\OPC.Repository\OPC.Repository.csproj" />
   </ItemGroup>
 

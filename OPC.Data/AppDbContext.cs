@@ -23,8 +23,8 @@ namespace OPC.Data
 
         #region 数据区域
         public DbSet<User> User { get; set; }
-     
 
+        public DbSet<NodeInfo> NodeInfo { get; set; }
         #endregion
 
     }

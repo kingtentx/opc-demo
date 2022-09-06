@@ -29,6 +29,8 @@ namespace OPCForm
         private bool IsLoop = false;
         private string path = AppConfig.GetXmlConfig;
         private IRepository<User> _userRepository;
+        private IRepository<NodeInfo> _nodeinfoRepository;
+        private NodeInfo _nodeInfo;
 
         public Form1()
         {
@@ -41,6 +43,7 @@ namespace OPCForm
             #region 获取数据表
 
             _userRepository = (IRepository<User>)Program.ServiceProvider.GetService(typeof(IRepository<User>));
+            _nodeinfoRepository = (IRepository<NodeInfo>)Program.ServiceProvider.GetService(typeof(IRepository<NodeInfo>));
 
             #endregion
 
@@ -228,6 +231,18 @@ namespace OPCForm
             nodesTreeView.SelectedNode = e.Node; //一定要先指定e.node，否则不能正确运行，下面加入自己的代码
             var nodeInfo = e.Node.Tag as OpcNodeInfo;
             currentNodeId = txtNode.Text = nodeInfo?.NodeId.ToString();
+
+            var opcvalue = client.ReadNode(nodeInfo.NodeId);
+            //赋值
+            _nodeInfo = new NodeInfo()
+            {
+                NodeName = nodeInfo.DisplayName,
+                NodeId = nodeInfo.NodeId.ToString(),
+                DataType = opcvalue != null ? opcvalue.DataType.ToString() : "",
+                DataModel = "",
+                CreateTime = DateTime.Now
+            };
+
 
         }
 
@@ -601,6 +616,14 @@ namespace OPCForm
                 //Form2 fr3 = new Form2("");
                 //MessageBox.Show("保存失败");
                 mqtt = false;
+            }
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            if (_nodeinfoRepository.Add(_nodeInfo).Id > 0)
+            {
+                MessageBox.Show("success");
             }
         }
 

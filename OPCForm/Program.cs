@@ -13,16 +13,24 @@ namespace OPCForm
     {
         public static IServiceProvider ServiceProvider { get; set; }
 
+#if DEBUG
+        private static string sqlbaseDir = Common.GetApplicationPath();
+#else
+        private static string sqlbaseDir = AppDomain.CurrentDomain.BaseDirectory;
+#endif
+
         static void ConfigureServices()
         {
+
             var services = new ServiceCollection();
             services.AddDbContext<AppDbContext>(options =>
-              options.UseSqlite(ConfigurationManager.ConnectionStrings["DatabaseConnection"].ConnectionString));
+             //options.UseSqlite(ConfigurationManager.ConnectionStrings["DatabaseConnection"].ConnectionString)
+             options.UseSqlite("Data Source=" + Path.Combine(sqlbaseDir, "AppData\\OpcDB.db")));
 
             services.AddTransient(typeof(IRepository<>), typeof(Repository<>));
 
             ServiceProvider = services.BuildServiceProvider();
-        }
+        }      
 
         /// <summary>
         ///  The main entry point for the application.
@@ -40,20 +48,13 @@ namespace OPCForm
 
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
-            ApplicationConfiguration.Initialize();
-
-
-            //string dataDir = AppDomain.CurrentDomain.BaseDirectory;
-            //if (dataDir.EndsWith(@"\bin\Debug\") || dataDir.EndsWith(@"\bin\Release\"))
-            //{
-            //    dataDir = Directory.GetParent(dataDir).Parent.Parent.Parent.FullName + "\\AppData";
-            //    AppDomain.CurrentDomain.SetData("DataDirectory", dataDir);
-            //}
+            ApplicationConfiguration.Initialize();        
 
             ConfigureServices();
             InitApp();
 
             Application.Run(new Main());
+            //Application.Run(new Form3());
         }
 
         private static void InitApp()

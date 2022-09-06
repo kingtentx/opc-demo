@@ -9,11 +9,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OPCForm", "OPCForm\OPCForm.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpcClientTest", "OpcClientTest\OpcClientTest.csproj", "{F8148624-2282-40F8-983B-23BF5B31C10A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OPC.Data", "OPC.Data\OPC.Data.csproj", "{484C606F-E65A-4005-82CB-55A5951F258D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OPC.Data", "OPC.Data\OPC.Data.csproj", "{484C606F-E65A-4005-82CB-55A5951F258D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OPC.Repository", "OPC.Repository\OPC.Repository.csproj", "{A8F27E2C-65C5-4865-9A77-692C7E689E23}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OPC.Repository", "OPC.Repository\OPC.Repository.csproj", "{A8F27E2C-65C5-4865-9A77-692C7E689E23}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{ED8B64B8-AA16-4B71-B5F9-6B52D0169B85}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OPC.Helper", "OPC.Helper\OPC.Helper.csproj", "{16C3DEF0-F85D-4932-87B6-8B7DC158A9D4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,6 +43,10 @@ Global
 		{A8F27E2C-65C5-4865-9A77-692C7E689E23}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A8F27E2C-65C5-4865-9A77-692C7E689E23}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A8F27E2C-65C5-4865-9A77-692C7E689E23}.Release|Any CPU.Build.0 = Release|Any CPU
+		{16C3DEF0-F85D-4932-87B6-8B7DC158A9D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{16C3DEF0-F85D-4932-87B6-8B7DC158A9D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{16C3DEF0-F85D-4932-87B6-8B7DC158A9D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{16C3DEF0-F85D-4932-87B6-8B7DC158A9D4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

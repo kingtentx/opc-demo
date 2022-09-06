@@ -18,7 +18,7 @@ namespace OPCForm
             InitializeComponent();
         }
 
-        public int[] s = { 0, 0 };//用来记录窗体是否打开过
+        public int[] s = { 0, 0, 0 };//用来记录窗体是否打开过
         private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (s[tabControl1.SelectedIndex] == 0)

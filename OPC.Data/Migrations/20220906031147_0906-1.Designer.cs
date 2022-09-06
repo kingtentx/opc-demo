@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OPC.Data;
 
@@ -10,9 +11,10 @@ using OPC.Data;
 namespace OPC.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220906031147_0906-1")]
+    partial class _09061
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "6.0.8");
@@ -27,6 +29,7 @@ namespace OPC.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("DataModel")
+                        .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("TEXT");
 
@@ -43,9 +46,6 @@ namespace OPC.Data.Migrations
                     b.Property<string>("NodeName")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime?>("UpdateTime")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");

@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Root>
   <OpcConfig>
-    <Address>opc.tcp://10.47.24.51:49320</Address>
-    <UserName>opc-demo</UserName>
-    <Password>IoaRY5N3aRsKiJOr</Password>
+    <Address>opc.tcp://127.0.0.1:4840</Address>
+    <UserName>user</UserName>
+    <Password>123456</Password>
   </OpcConfig>
   <MqttConfig>
     <Address>127.0.0.1</Address>
