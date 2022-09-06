@@ -11,24 +11,16 @@ using System.Threading.Tasks;
 
 namespace OPC.Repository
 {
-  
     /// <summary>
     /// 数据访问层
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public class Repository<T> : IRepository<T> where T : class, new()
     {
+        protected AppDbContext _dbContext = new AppDbContext();
 
-        protected DbContext _dbContext;
         private bool _disposed = false;
-        /// <summary>
-        /// 获得数据库上下文
-        /// </summary>
-        /// <param name="dbContext">数据库上下文类</param>
-        public Repository(AppDbContext dbContext)
-        {
-            _dbContext = dbContext;
-        }
+
 
         public IDbContextTransaction BeginTransaction()
         {

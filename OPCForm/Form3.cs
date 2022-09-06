@@ -15,24 +15,24 @@ namespace OPCForm
 {
     public partial class Form3 : Form
     {
-        private IRepository<NodeInfo> _nodeinfoRepository;
+        //IRepository<NodeInfo> repository = new Repository<NodeInfo>();
+        AppDbContext _db = new AppDbContext();
 
         public Form3()
         {
             InitializeComponent();
 
-            #region 获取数据表
-
-            _nodeinfoRepository = (IRepository<NodeInfo>)Program.ServiceProvider.GetService(typeof(IRepository<NodeInfo>));
-
-            #endregion
             dataGridView1.DataSource = GetList();
         }
 
         public List<NodeInfo> GetList()
         {
             var where = LambdaHelper.True<NodeInfo>();
-            return _nodeinfoRepository.GetList(where);
+            //var list = repository.GetList(where, x => x.Id);
+
+            var list = _db.NodeInfo.Where(where).OrderBy(x => x.Id).ToList();
+
+            return list;
         }
 
         private void button1_Click(object sender, EventArgs e)

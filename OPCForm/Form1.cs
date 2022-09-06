@@ -27,9 +27,7 @@ namespace OPCForm
         private static List<SubscriptionInfo> subscriptionList = new List<SubscriptionInfo>();
         private static string currentNodeId;
         private bool IsLoop = false;
-        private string path = AppConfig.GetXmlConfig;
-        private IRepository<User> _userRepository;
-        private IRepository<NodeInfo> _nodeinfoRepository;
+        private string path = AppConfig.GetXmlConfig;      
         private NodeInfo _nodeInfo;
 
         public Form1()
@@ -42,11 +40,11 @@ namespace OPCForm
 
             #region 获取数据表
 
-            _userRepository = (IRepository<User>)Program.ServiceProvider.GetService(typeof(IRepository<User>));
-            _nodeinfoRepository = (IRepository<NodeInfo>)Program.ServiceProvider.GetService(typeof(IRepository<NodeInfo>));
+            //_userRepository = (IRepository<User>)Program.ServiceProvider.GetService(typeof(IRepository<User>));
+            //_nodeinfoRepository = (IRepository<NodeInfo>)Program.ServiceProvider.GetService(typeof(IRepository<NodeInfo>));
 
             #endregion
-           
+
 
             XDocument doc = XDocument.Load(path);
             XElement mqttConfig = doc.Element("Root").Element("OpcConfig");
@@ -606,22 +604,21 @@ namespace OPCForm
         private void chkPush_CheckedChanged(object sender, EventArgs e)
         {
             if (chkPush.Checked)
-            {
-                //MessageBox.Show("保存成功");
-                //Form2 fr3 = new Form2("要传的值啊");
+            {             
                 mqtt = true;
             }
             else
-            {
-                //Form2 fr3 = new Form2("");
-                //MessageBox.Show("保存失败");
+            {              
                 mqtt = false;
             }
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            if (_nodeinfoRepository.Add(_nodeInfo).Id > 0)
+            var _db = new AppDbContext();
+            _db.NodeInfo.Add(_nodeInfo);
+            //db.SaveChanges();
+            if (_db.SaveChanges() > 0)
             {
                 MessageBox.Show("success");
             }
