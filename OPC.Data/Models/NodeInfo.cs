@@ -16,6 +16,8 @@ namespace OPC.Data
         public string NodeId { get; set; }
         [StringLength(200)]
         public string NodeName { get; set; }
+        [StringLength(200)]
+        public string NodeClass { get; set; }
         [StringLength(20)]
         public string DataType { get; set; }
         [StringLength(500), AllowNull]
