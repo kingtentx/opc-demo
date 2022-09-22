@@ -14,6 +14,7 @@ using System.Collections.Concurrent;
 using System.Xml.Linq;
 using OPC.Repository;
 using OPC.Data;
+using Serilog;
 
 namespace OPCForm
 {
@@ -28,8 +29,6 @@ namespace OPCForm
         private static string currentNodeId;
         private bool IsLoop = false;
         private string path = AppConfig.GetXmlConfig;
-        private IRepository<User> _userRepository;
-        private IRepository<NodeInfo> _nodeinfoRepository;
         private NodeInfo _nodeInfo;
 
         public Form1()
@@ -39,14 +38,6 @@ namespace OPCForm
             this.client = new OpcClient();
             //初始化listview
             InitListView(logListView, logImageList);
-
-            #region 获取数据表
-
-            _userRepository = (IRepository<User>)Program.ServiceProvider.GetService(typeof(IRepository<User>));
-            _nodeinfoRepository = (IRepository<NodeInfo>)Program.ServiceProvider.GetService(typeof(IRepository<NodeInfo>));
-
-            #endregion
-           
 
             XDocument doc = XDocument.Load(path);
             XElement mqttConfig = doc.Element("Root").Element("OpcConfig");
@@ -233,19 +224,19 @@ namespace OPCForm
             currentNodeId = txtNode.Text = nodeInfo?.NodeId.ToString();
 
             var opcvalue = client.ReadNode(nodeInfo.NodeId);
+
+            //var nodeclass = nodeInfo.Reference.Category;//节点类型 Object Variable
             //赋值
             _nodeInfo = new NodeInfo()
             {
                 NodeName = nodeInfo.DisplayName,
                 NodeId = nodeInfo.NodeId.ToString(),
                 DataType = opcvalue != null ? opcvalue.DataType.ToString() : "",
+                NodeClass = nodeInfo.Reference.Category.ToString(),
                 DataModel = "",
                 CreateTime = DateTime.Now
             };
-
-
         }
-
 
         private async void btnRead_Click(object sender, EventArgs e)
         {
@@ -291,6 +282,8 @@ namespace OPCForm
                 }
                 else
                 {
+                    GetNodes(client.BrowseNode(txtNode.Text));
+
                     var token = new CancellationTokenSource();
                     var dataChanges = new BlockingCollection<SubscriptionItem>();
 
@@ -306,12 +299,13 @@ namespace OPCForm
                         ConsumerThread = consumerThread
                     };
                     consumerList.Add(consumer);
+                    //Log.Information("订阅consumerList=>" + JsonConvert.SerializeObject(consumerList.Select(p => p.NodeId)) + "--nodeList=>" + JsonConvert.SerializeObject(nodeList));
                     //-----------
                     //this.SubscriptionNode(txtNode.Text, Convert.ToInt32(txtTime.Text));
 
                     //listBox记录订阅
                     listSubscribe.Items.Add(txtNode.Text);
-                    GetNodes(client.BrowseNode(txtNode.Text));
+                    //GetNodes(client.BrowseNode(txtNode.Text));
                 }
             }
             catch (Exception ex)
@@ -323,22 +317,29 @@ namespace OPCForm
         //查询当前节点，记录子节点
         private void GetNodes(OpcNodeInfo node)
         {
-            string strKey;
-            if (node.Children().Count() > 0)
+            string strKey = node.NodeId.ToString(OpcNodeIdFormat.Foundation);
+            if (!nodeList.ContainsKey(strKey))
+                nodeList.Add(strKey, strKey);
+
+            if (node.Children().Count() > 0 && node.Reference.Category.ToString().Equals(NodeClassType.Object.ToString()))
             {
+                nodeList.Add(strKey, strKey);
                 foreach (var childNode in node.Children())
                 {
                     strKey = childNode.NodeId.ToString(OpcNodeIdFormat.Foundation);
                     if (!nodeList.ContainsKey(strKey))
+                    {
                         nodeList.Add(strKey, node.NodeId.ToString(OpcNodeIdFormat.Foundation));
+                    }
+
                 }
             }
-            else
-            {
-                strKey = node.NodeId.ToString(OpcNodeIdFormat.Foundation);
-                if (!nodeList.ContainsKey(strKey))
-                    nodeList.Add(strKey, strKey);
-            }
+            //else
+            //{
+            //    strKey = node.NodeId.ToString(OpcNodeIdFormat.Foundation);
+            //    if (!nodeList.ContainsKey(strKey))
+            //        nodeList.Add(strKey, strKey);
+            //}
         }
 
         #region test
@@ -376,26 +377,34 @@ namespace OPCForm
         private static IEnumerable<OpcSubscribeDataChange> CreateCommands(OpcClient client, OpcNodeId rootNodeId)
         {
             var nodeInfo = client.BrowseNode(rootNodeId);
-
-            yield return new OpcSubscribeDataChange(nodeInfo.NodeId, HandleDataChange);
-
-            //if (nodeInfo.Children().Count() > 0)
-            //{
-            //    foreach (var childNode in nodeInfo.Children())
-            //        yield return new OpcSubscribeDataChange(childNode.NodeId, HandleDataChange);
-            //}
-            //else
-            //{
-            //    yield return new OpcSubscribeDataChange(nodeInfo.NodeId, HandleDataChange);
-            //}
-
+            //Log.Information("NodeClass=>" + nodeInfo.Reference.Category.ToString());
+            if (nodeInfo.Reference.Category.ToString().Equals(NodeClassType.Variable.ToString()))
+            {
+                yield return new OpcSubscribeDataChange(nodeInfo.NodeId, HandleDataChange);
+            }
+            else
+            {
+                if (nodeInfo.Children().Count() > 0)
+                {
+                    foreach (var childNode in nodeInfo.Children())
+                        yield return new OpcSubscribeDataChange(childNode.NodeId, HandleDataChange);
+                }
+                //else
+                //{
+                //    yield return new OpcSubscribeDataChange(nodeInfo.NodeId, HandleDataChange);
+                //}
+            }
         }
 
         private static void HandleDataChange(object sender, OpcDataChangeReceivedEventArgs e)
         {
+
             var item = (OpcMonitoredItem)sender;
             //var subItem = new SubscriptionItem() { NodeId = item.NodeId.ValueAsString, NodeValue = e.Item.Value };
             var strNodeId = item.NodeId.ToString(OpcNodeIdFormat.Foundation);
+
+            //Log.Information(JsonConvert.SerializeObject(consumerList.Select(p => p.NodeId)) + "--strNodeId=>" + strNodeId + "--nodeList=>" + nodeList[strNodeId]);
+            //Log.Information(JsonConvert.SerializeObject(consumerList.Select(p => p.NodeId)) + "--strNodeId=>" + strNodeId);
             var subItem = new SubscriptionItem() { NodeId = strNodeId, NodeValue = e.Item.Value };
 
             var consumer = consumerList.Where(p => p.NodeId.Equals(nodeList[strNodeId])).FirstOrDefault();
@@ -607,21 +616,20 @@ namespace OPCForm
         {
             if (chkPush.Checked)
             {
-                //MessageBox.Show("保存成功");
-                //Form2 fr3 = new Form2("要传的值啊");
                 mqtt = true;
             }
             else
             {
-                //Form2 fr3 = new Form2("");
-                //MessageBox.Show("保存失败");
                 mqtt = false;
             }
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            if (_nodeinfoRepository.Add(_nodeInfo).Id > 0)
+            var _db = new AppDbContext();
+            _db.NodeInfo.Add(_nodeInfo);
+            //db.SaveChanges();
+            if (_db.SaveChanges() > 0)
             {
                 MessageBox.Show("success");
             }

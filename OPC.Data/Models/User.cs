@@ -12,5 +12,7 @@ namespace OPC.Data
 
         [StringLength(100)]
         public string Password { get; set; }
+
+        public DateTime? CreateTime { get; set; }
     }
 }

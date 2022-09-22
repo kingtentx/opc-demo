@@ -15,29 +15,53 @@ namespace OPCForm
 {
     public partial class Form3 : Form
     {
-        private IRepository<NodeInfo> _nodeinfoRepository;
+        //IRepository<NodeInfo> repository = new Repository<NodeInfo>();
+        AppDbContext _db = new AppDbContext();
 
         public Form3()
         {
             InitializeComponent();
 
-            #region 获取数据表
-
-            _nodeinfoRepository = (IRepository<NodeInfo>)Program.ServiceProvider.GetService(typeof(IRepository<NodeInfo>));
-
-            #endregion
-            dataGridView1.DataSource = GetList();
+            BindData();
         }
 
         public List<NodeInfo> GetList()
         {
             var where = LambdaHelper.True<NodeInfo>();
-            return _nodeinfoRepository.GetList(where);
+            //var list = repository.GetList(where, x => x.Id);
+
+            var list = _db.NodeInfo.Where(where).OrderBy(x => x.Id).ToList();
+
+            return list;
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            dataGridView1.DataSource = GetList();
+            BindData();
+        }
+
+        public void BindData()
+        {
+            dataGridView1.Columns.Clear();
+            dataGridView1.AutoGenerateColumns = false;
+
+            dataGridView1.Columns.Add("Id", "序号");
+            dataGridView1.Columns[0].DataPropertyName = "Id";
+
+            dataGridView1.Columns.Add("NodeName", "名称");
+            dataGridView1.Columns[1].DataPropertyName = "NodeName";
+
+            dataGridView1.Columns.Add("NodeId", "节点");
+            dataGridView1.Columns[2].DataPropertyName = "NodeId";
+            dataGridView1.Columns[2].Width = 320;
+
+            dataGridView1.Columns.Add("DataType", "数据类型");
+            dataGridView1.Columns[3].DataPropertyName = "DataType";
+
+            dataGridView1.Columns.Add("CreateTime", "添加时间");
+            dataGridView1.Columns[4].DataPropertyName = "CreateTime";
+
+            dataGridView1.DataSource = new BindingList<NodeInfo>(GetList());
         }
     }
 }

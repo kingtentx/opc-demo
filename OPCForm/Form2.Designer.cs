@@ -166,7 +166,7 @@
             this.txtTopic.Name = "txtTopic";
             this.txtTopic.Size = new System.Drawing.Size(536, 27);
             this.txtTopic.TabIndex = 7;
-            this.txtTopic.Text = "opc/pc/test";
+            this.txtTopic.Text = "$oc/devices/{id}/sys/messages/";
             // 
             // labTopic
             // 
