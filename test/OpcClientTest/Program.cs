@@ -1,9 +1,13 @@
-﻿using Opc.UaFx;
-using Opc.UaFx.Client;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using TreeCollections;
 using System.Text;
 using System.Diagnostics;
+using Opc.Ua.Client;
+using Opc.Ua;
+using System.Net;
+using OpcUaHelper;
+using System.Threading;
+using TreeCollections;
 
 namespace OpcClientTest
 {
@@ -11,132 +15,271 @@ namespace OpcClientTest
     {
         private static Stopwatch stopwatch1 = new Stopwatch();
 
-        public static void Main(string[] args)
+        /// <summary>
+        /// Opc客户端的核心类
+        /// </summary>
+        private static OpcUaClient m_OpcUaClient = null;
+
+        /// <summary>
+        /// 初始化
+        /// </summary>
+        private void OpcUaClientInitialization()
+        {
+            m_OpcUaClient = new OpcUaClient();
+            //m_OpcUaClient.OpcStatusChange += M_OpcUaClient_OpcStatusChange1; ;
+            //m_OpcUaClient.ConnectComplete += M_OpcUaClient_ConnectComplete;
+        }
+
+        public async static Task Main(string[] args)
         {
 
-            //using (var client = new OpcClient("opc.tcp://192.168.0.1:4840/"))
+            //Console.WriteLine("【1】创建ApplicationConfiguration...");
+            //var config = UpcUaClient_1.CreateAppConfiguration();
+            //config.Validate(ApplicationType.Client).GetAwaiter().GetResult();
+            //if (config.SecurityConfiguration.AutoAcceptUntrustedCertificates)
             //{
-            //    client.Connect();
-            //    var node = client.BrowseNode(new OpcNodeId("\"communication data\".\"int array to send\"", 3));
+            //    config.CertificateValidator.CertificateValidation += (s, e) => { e.Accept = (e.Error.StatusCode == StatusCodes.BadCertificateUntrusted); };
+            //}
 
-            //    List<OpcNodeId> nodeList = new List<OpcNodeId>();
-            //    OpcNodeId[] nodes;
-            //    Browse(node, nodeList);
-            //    Console.WriteLine("done loading");
-            //    nodes = nodeList.ToArray();
-            //    stopwatch1.Start();
-
-            //    SampleaAndMessureWithSubscription(client, nodes);
-
-            //    Console.Read();
+            //var application = new Opc.Ua.Configuration.ApplicationInstance
+            //{
+            //    ApplicationName = "MyHomework",
+            //    ApplicationType = ApplicationType.Client,
+            //    ApplicationConfiguration = config
             //};
+            //application.CheckApplicationInstanceCertificate(false, 2048).GetAwaiter().GetResult();
+
+            //var host = Dns.GetHostName();
+
+            //Console.WriteLine("【2】创建Session...");
+
+            // Task <Session> session =  UpcUaClient_1.ConnectOpcServer("opc.tcp://localhost:4840/", config);
+
+            //var opcinfo = session.Result;
+
+            //var no = opcinfo.ReadValue("ns=3;s=factory_1/line2/Temp");
+
+            //Console.WriteLine(no);
 
 
+            //Console.WriteLine("【3】创建subscription...");
+            //var subscription = CreateSubscription(session.Result, 1000);
+            //Console.WriteLine("【4】增加Event监听.");
 
-            Console.WriteLine("Hello, World!");
+            //Console.WriteLine("【4】增加监控项目.");
+            //AddMonitorItem(subscription);
+            //Console.WriteLine("【5】开始订阅.");
 
-            var client = new OpcClient("opc.tcp://127.0.0.1:4840");
-            client.Security.UserIdentity = new OpcClientIdentity("user", "123456");
-            //client.Security.EndpointPolicy = new OpcSecurityPolicy(OpcSecurityMode.SignAndEncrypt, OpcSecurityAlgorithm.Basic256);
-            client.Connect();
+            //subscription.Create();
+            // UpcUaClient.Write(session.Result, "ns=2;s=MES.DEV01.CURRENT_PIECE", 13, "aabbccdd");
 
 
-            var value = client.ReadNode("ns=3;s=factory_1/line1/Temp").Value;
-            double[] tem = (double[])value;
-            Console.WriteLine(string.Join(",", tem));
+            m_OpcUaClient = new OpcUaClient();
+            m_OpcUaClient.UserIdentity = new UserIdentity("user", "123456");
+            await m_OpcUaClient.ConnectServer("opc.tcp://localhost:4840/");
 
-            //读数据
-            //var node = client.BrowseNode(OpcObjectTypes.ObjectsFolder);
-            //Program.Browse(node);
-            //client.Disconnect();
-            //Console.ReadKey(true);
+            string nodeId = "ns=3;s=factory_1/line2/Temp";
 
-            //写数据          
-            OpcWriteNode[] wCommands = new OpcWriteNode[] {
-                new OpcWriteNode("ns=3;s=factory_1/line2/Temp", (double)18)
-            };
-            OpcStatusCollection results = client.WriteNodes(wCommands);
-            if (results[0].IsBad)
+            if (m_OpcUaClient.Connected)
             {
-                Console.WriteLine(results[0].Description);
+                var obj = ObjectIds.ObjectsFolder;
+                PopulateBranch(obj);
+
+                ////读取节点
+                //DataValue dataValue = m_OpcUaClient.ReadNode(nodeId);
+                //Console.WriteLine("【1】读取" + nodeId + "：" + dataValue);
+
+
+                ////订阅节点
+                //Session session = m_OpcUaClient.Session;
+
+                //Console.WriteLine("【3】创建subscription...");
+                //var subscription = CreateSubscription(session, 600);
+                //Console.WriteLine("【4】增加Event监听.");
+
+                ////Console.WriteLine("【4】增加监控项目.");
+                //AddMonitorItem(subscription);
+                //Console.WriteLine("【5】开始订阅.");
+
+                //subscription.Create();
+
+
             }
 
-            // 订阅
-            OpcSubscription subscription = client.SubscribeDataChange("ns=3;s=factory_1/line2/Temp", HandleDataChanged);
-            subscription.PublishingInterval = 1000;
-            subscription.ApplyChanges();
 
-            Thread.Sleep(60000);
-
-            // 取消订阅
-            if (client.State == OpcClientState.Connected)
-            {
-                if (subscription != null)
-                {
-                    subscription.Unsubscribe();
-                    Console.WriteLine("取消订阅");
-                }
-
-            }
-            //client.Disconnect();
 
             Console.ReadKey(true);
+
         }
 
-        private static void HandleDataChanged(object sender, OpcDataChangeReceivedEventArgs e)
+
+
+        /// <summary>
+        /// 在会话中新增一个订阅
+        /// </summary>
+        /// <param name="session"></param>
+        /// <returns></returns>
+        private static Subscription CreateSubscription(Session session, int publishingInterval)
         {
-            OpcMonitoredItem item = (OpcMonitoredItem)sender;
-            Console.WriteLine("DataChange: {0} = {1}", item.NodeId, e.Item.Value);
+
+            var subscription = new Subscription(session.DefaultSubscription)
+            {
+                PublishingInterval = publishingInterval,
+                PublishingEnabled = true
+
+            };
+
+            subscription.DefaultItem.AttributeId = Attributes.Value;
+            subscription.DefaultItem.MonitoringMode = MonitoringMode.Reporting;
+            subscription.DefaultItem.SamplingInterval = 1000;
+            subscription.DefaultItem.QueueSize = 0;
+            subscription.DefaultItem.DiscardOldest = true;
+            session.AddSubscription(subscription);
+
+            return subscription;
+
         }
 
-        #region ---------- Private static methods ----------
-
-        private static void Browse(OpcNodeInfo node)
+        private static void AddMonitorItem(Subscription subscription)
         {
-            Program.Browse(node, 0);
+            //定义MonitorItems默认值
+            var item = new MonitoredItem(subscription.DefaultItem)
+            {
+                StartNodeId = "ns=3;s=factory_1/line2/Temp",
+                DisplayName = "温度"
+
+            };
+            item.Notification += monitoredItem_Notification;
+            subscription.AddItem(item);
+
+            //subscription.AddItem(CreateMonitorItems("ns=2;s=POLISH.RobotPLC.MEM.HMI在线"));
+            //subscription.AddItem(CreateMonitorItems("ns=2;s=POLISH.RobotPLC.EXTY.ExtYGoto", "下个位置"));
+            //subscription.AddItem(CreateMonitorItems("ns=2;s=POLISH.RobotPLC.EXTY.ExtYOnPosition", "导轨就位"));
+            //subscription.AddItem(CreateMonitorItems("ns=2;s=POLISH.RobotPLC.EXTY.ExtYPosition", "当前位置"));
+
         }
 
-        private static void Browse(OpcNodeInfo node, int level)
+        /// <summary>
+        /// 创建一个监控项目
+        /// </summary>
+        /// <param name="nodeId"></param>
+        /// <returns></returns>
+        private static MonitoredItem CreateMonitorItems(NodeId nodeId, string displayName)
         {
-            //// In general attributes and children are retrieved from the server on demand. This
-            //// is done to reduce the amount of traffic and to improve the preformance when
-            //// searching/browsing for specific attributes or children. After attributes or
-            //// children of a node were browsed they are stored internally so that subsequent
-            //// attribute and children requests are processed without any interaction with the
-            //// OPC UA server.
+            var monitoredItem = new MonitoredItem();
+            monitoredItem.StartNodeId = nodeId;
+            monitoredItem.DisplayName = displayName;
+            monitoredItem.AttributeId = Attributes.Value;
+            monitoredItem.MonitoringMode = MonitoringMode.Reporting;
+            monitoredItem.SamplingInterval = 50;
+            monitoredItem.QueueSize = 0;
+            monitoredItem.DiscardOldest = true;
+            // 定义监控项的事件处理
+            monitoredItem.Notification += monitoredItem_Notification;
+            return monitoredItem;
 
-            // Browse the DisplayName attribute of the node. It is also possible to browse
-            // multiple attributes at once (see the method Attributes(...)).
-            var displayName = node.Attribute(OpcAttribute.DisplayName);
-
-            Console.WriteLine(
-                    "{0}{1} ({2})",
-                    new string(' ', level * 4),
-                    node.NodeId.ToString(OpcNodeIdFormat.Foundation),
-                    displayName.Value);
-
-            // Browse the children of the node and continue browsing in preorder.
-            foreach (var childNode in node.Children())
-                Program.Browse(childNode, level + 1);
         }
 
+        /// <summary>
+        /// 监控到数据变化的处理
+        /// </summary>
+        /// <param name="monitoredItem"></param>
+        /// <param name="e"></param>
+        static void monitoredItem_Notification(MonitoredItem monitoredItem, MonitoredItemNotificationEventArgs e)
+        {
+
+            MonitoredItemNotification notification = e.NotificationValue as MonitoredItemNotification;
+            if (notification == null)
+            {
+                return;
+            }
+
+            string outStr = monitoredItem.StartNodeId.ToString() + "value: " + Utils.Format("{0}", notification.Value.WrappedValue.ToString()) +
+                                       ";  StatusCode: " + Utils.Format("{0}", notification.Value.StatusCode.ToString()) +
+                                       ";  Source timestamp: " + notification.Value.SourceTimestamp.ToString() +
+                                       ";  Server timestamp: " + notification.Value.ServerTimestamp.ToString();
+            Console.WriteLine(outStr);
+        }
+
+        private static void OnNotification(MonitoredItem item, MonitoredItemNotificationEventArgs e)
+        {
+            foreach (var value in item.DequeueValues())
+            {
+                Console.WriteLine("{0}: {1}, {2}, {3}", item.DisplayName, value.Value, value.SourceTimestamp, value.StatusCode);
+            }
+        }
+
+        #region test
+        private async static void PopulateBranch(NodeId sourceId)
+        {
+
+            // fetch references from the server.
+
+            ReferenceDescriptionCollection references = GetReferenceDescriptionCollection(sourceId);
+            // List<TreeNode> list = new List<TreeNode>();
+            if (references != null)
+            {
+                // process results.
+                for (int ii = 0; ii < references.Count; ii++)
+                {
+                    ReferenceDescription target = references[ii];
+
+                    Console.WriteLine(ii + "-------------" + target);
+                    //TreeNode child = new TreeNode(Utils.Format("{0}", target));
+
+                    // child.Tag = target;
+                    //string key = GetImageKeyFromDescription(target, sourceId);
+                    // child.ImageKey = key;
+                    // child.SelectedImageKey = key;
+
+                    // if (target.NodeClass == NodeClass.Object || target.NodeClass == NodeClass.Unspecified || expanded)
+                    // {
+                    //     child.Nodes.Add(new TreeNode());
+                    // }
+
+
+
+
+                    // list.Add(child);
+                }
+            }
+
+        }
+
+        private static ReferenceDescriptionCollection GetReferenceDescriptionCollection(NodeId sourceId)
+        {
+            TaskCompletionSource<ReferenceDescriptionCollection> task = new TaskCompletionSource<ReferenceDescriptionCollection>();
+
+            // find all of the components of the node.
+            BrowseDescription nodeToBrowse1 = new BrowseDescription();
+
+            nodeToBrowse1.NodeId = sourceId;
+            nodeToBrowse1.BrowseDirection = BrowseDirection.Forward;
+            nodeToBrowse1.ReferenceTypeId = ReferenceTypeIds.Aggregates;
+            nodeToBrowse1.IncludeSubtypes = true;
+            nodeToBrowse1.NodeClassMask = (uint)(NodeClass.Object | NodeClass.Variable | NodeClass.Method | NodeClass.ReferenceType | NodeClass.ObjectType | NodeClass.View | NodeClass.VariableType | NodeClass.DataType);
+            nodeToBrowse1.ResultMask = (uint)BrowseResultMask.All;
+
+            // find all nodes organized by the node.
+            BrowseDescription nodeToBrowse2 = new BrowseDescription();
+
+            nodeToBrowse2.NodeId = sourceId;
+            nodeToBrowse2.BrowseDirection = BrowseDirection.Forward;
+            nodeToBrowse2.ReferenceTypeId = ReferenceTypeIds.Organizes;
+            nodeToBrowse2.IncludeSubtypes = true;
+            nodeToBrowse2.NodeClassMask = (uint)(NodeClass.Object | NodeClass.Variable | NodeClass.Method | NodeClass.View | NodeClass.ReferenceType | NodeClass.ObjectType | NodeClass.VariableType | NodeClass.DataType);
+            nodeToBrowse2.ResultMask = (uint)BrowseResultMask.All;
+
+            BrowseDescriptionCollection nodesToBrowse = new BrowseDescriptionCollection();
+            nodesToBrowse.Add(nodeToBrowse1);
+            nodesToBrowse.Add(nodeToBrowse2);
+
+            // fetch references from the server.
+            ReferenceDescriptionCollection references = FormUtils.Browse(m_OpcUaClient.Session, nodesToBrowse, false);
+            return references;
+        }
         #endregion
 
-        private static void SampleaAndMessureWithSubscription(OpcClient client, OpcNodeId[] nodes)
-        {
-            OpcSubscription subscription = client.SubscribeNodes();
-            for (int i = 0; i < nodes.Length; i++)
-            {
-                var item = new OpcMonitoredItem(nodes[i], OpcAttribute.Value);
-                item.DataChangeReceived += HandleDataChanged;
-                item.Tag = i;
-                item.SamplingInterval = 20;
-
-                subscription.AddMonitoredItem(item);
-            }
-            subscription.PublishingInterval = 20;
-            subscription.ApplyChanges();
-        }
     }
 }
 

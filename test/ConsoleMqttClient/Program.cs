@@ -14,8 +14,6 @@ namespace ConsoleMqttClient
             MqttClientService clientService = new();
             clientService.MqttClientStart();
 
-
-
             Thread.Sleep(3000);
             //clientService.Publish("tstt");
             clientService.Subscribe("demo2");

@@ -29,7 +29,7 @@ namespace OPCForm
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize(); 
           
-            Application.Run(new Main());
+            Application.Run(new FormOPC());
             //Application.Run(new Form3());
         }   
     }

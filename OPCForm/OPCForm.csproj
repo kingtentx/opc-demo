@@ -17,7 +17,9 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="6.0.8" />
     <PackageReference Include="MQTTnet" Version="4.1.0.247" />
-    <PackageReference Include="Opc.UaFx.Client" Version="2.28.0" />
+    <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua" Version="1.4.370.12" />
+    <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua.Client" Version="1.4.370.12" />
+    <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua.Core" Version="1.4.370.12" />
     <PackageReference Include="Serilog" Version="2.11.0" />
     <PackageReference Include="Serilog.AspNetCore" Version="6.0.1" />
     <PackageReference Include="Serilog.Sinks.Async" Version="1.5.0" />
@@ -28,6 +30,21 @@
     <ProjectReference Include="..\OPC.Data\OPC.Data.csproj" />
     <ProjectReference Include="..\OPC.Helper\OPC.Helper.csproj" />
     <ProjectReference Include="..\OPC.Repository\OPC.Repository.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Resource.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resource.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Resource.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resource.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>
